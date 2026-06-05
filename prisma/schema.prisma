@@ -1,0 +1,174 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum ProjectCategory {
+  WORK
+  SIDE_PROJECT
+  AI_PRODUCT
+  CONTENT
+  LOCAL_AI
+  FINANCE
+  EDUCATION
+  MUSIC
+  INFRASTRUCTURE
+}
+
+enum Priority {
+  P0
+  P1
+  P2
+  P3
+}
+
+enum ProjectStage {
+  IDEA
+  RESEARCH
+  DESIGN
+  READY_FOR_CODEX
+  IN_CODEX
+  REVIEW
+  DONE
+  BLOCKED
+}
+
+enum TaskStatus {
+  TODO
+  RESEARCH
+  DESIGN
+  READY_FOR_CODEX
+  IN_PROGRESS
+  REVIEW
+  DONE
+  BLOCKED
+}
+
+enum AgentType {
+  GPT
+  CODEX
+  HUMAN
+  SYSTEM
+}
+
+enum PromptType {
+  GPT_PLANNING
+  CODEX_EXECUTION
+  REVIEW
+  SYSTEM
+}
+
+model Project {
+  id          String          @id @default(cuid())
+  name        String
+  slug        String          @unique
+  description String?
+  repoName    String?
+  repoUrl     String?
+  category    ProjectCategory @default(AI_PRODUCT)
+  priority    Priority        @default(P2)
+  stage       ProjectStage    @default(IDEA)
+  owner       String?
+  currentGoal String?
+  nextAction  String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  requirements Requirement[]
+  designs      DesignDocument[]
+  tasks        Task[]
+  prompts      Prompt[]
+  reviews      Review[]
+  workflows    WorkflowEvent[]
+}
+
+model Requirement {
+  id          String   @id @default(cuid())
+  projectId   String
+  title       String
+  description String
+  priority    Priority @default(P2)
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model DesignDocument {
+  id        String   @id @default(cuid())
+  projectId String
+  title     String
+  type      String
+  content   String
+  version   Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Task {
+  id                 String     @id @default(cuid())
+  projectId          String
+  title              String
+  description        String?
+  status             TaskStatus @default(TODO)
+  priority           Priority   @default(P2)
+  epic               String?
+  story              String?
+  scope              String?
+  acceptanceCriteria String?
+  codexPrompt        String?
+  resultSummary      String?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  reviews Review[]
+}
+
+model Prompt {
+  id        String     @id @default(cuid())
+  projectId String?
+  title     String
+  type      PromptType @default(GPT_PLANNING)
+  content   String
+  tags      String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  project Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  projectId String
+  taskId    String?
+  title     String
+  checklist String?
+  result    String?
+  riskLevel String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  task    Task?   @relation(fields: [taskId], references: [id], onDelete: SetNull)
+}
+
+model WorkflowEvent {
+  id          String    @id @default(cuid())
+  projectId   String
+  agentType   AgentType
+  fromStage   String?
+  toStage     String?
+  title       String
+  description String?
+  createdAt   DateTime  @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
