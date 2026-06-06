@@ -768,18 +768,20 @@ Please output:
 
 ### 中文
 
-交给 Codex 前，任务必须足够清晰。
+交给 Codex 前，先让 ChatGPT 完成规划和交接包。Codex 只负责边界清晰的工程执行，这样可以减少 Codex 在需求理解、方案探索和大范围阅读代码上的额度消耗。
 
 执行步骤：
 
-1. 打开 AI DevOS 的 `Tasks`
-2. 找到 `READY_FOR_CODEX` 任务
-3. 复制任务标题、范围、验收标准和 Prompt
-4. 在 Codex 中粘贴任务
-5. 要求 Codex 实现、测试、提交
-6. Codex 完成后检查结果
-7. 把执行摘要写入任务
-8. 创建 Review 记录
+1. 先在 ChatGPT 中澄清目标、范围、相关文件、实现步骤和验收标准
+2. 打开 AI DevOS 的项目 `Tasks` 页面
+3. 使用 `Codex Task Template` 创建任务
+4. 填写 `ChatGPT 规划摘要`
+5. 填写 `建议实现步骤`
+6. 填写 `Codex 省额度说明`
+7. 复制自动生成的 Codex Prompt
+8. 在 Codex 中粘贴任务并执行
+9. Codex 完成后检查结果
+10. 把执行摘要写入任务并创建 Review 记录
 
 推荐 Codex Prompt：
 
@@ -788,35 +790,40 @@ Please output:
 
 项目：
 任务：
+目标：
 范围：
+ChatGPT 规划摘要：
+建议实现步骤：
+Codex 省额度说明：
 相关文件：
 技术约束：
 验收标准：
 
-要求：
-1. 先阅读代码和上下文
-2. 按现有技术栈实现
-3. 保持改动范围聚焦
-4. 运行必要测试
-5. 说明验证结果
-6. 提交并推送到 GitHub
-7. 如需部署，请完成部署并给出访问地址
+低额度协作要求：
+1. ChatGPT 已完成规划，不要重新做大范围方案探索
+2. 优先阅读相关文件中列出的文件
+3. 按建议实现步骤执行
+4. 保持改动范围聚焦，不做无关重构
+5. 运行必要测试并说明验证结果
+6. 如需提交、推送或部署，完成后报告结果
 ```
 
 ### English
 
-Before sending a task to Codex, make sure it is clear enough.
+Before sending a task to Codex, let ChatGPT prepare the planning and handoff package first. Codex should only perform scoped engineering execution, which reduces quota spent on requirement discovery, solution exploration, and broad code reading.
 
 Steps:
 
-1. Open `Tasks` in AI DevOS
-2. Find a `READY_FOR_CODEX` task
-3. Copy title, scope, acceptance criteria, and prompt
-4. Paste the task into Codex
-5. Ask Codex to implement, test, and commit
-6. Review Codex output
-7. Save execution summary into the task
-8. Create a Review record
+1. Use ChatGPT to clarify goal, scope, related files, implementation steps, and acceptance criteria
+2. Open the project `Tasks` page in AI DevOS
+3. Create a task with `Codex Task Template`
+4. Fill in `ChatGPT planning summary`
+5. Fill in `Suggested implementation plan`
+6. Fill in `Codex budget notes`
+7. Copy the generated Codex Prompt
+8. Paste it into Codex and execute
+9. Review Codex output
+10. Save execution summary and create a Review record
 
 Recommended Codex prompt:
 
@@ -825,19 +832,22 @@ Please develop according to the following task until acceptance passes and the w
 
 Project:
 Task:
+Goal:
 Scope:
+ChatGPT planning summary:
+Suggested implementation plan:
+Codex budget notes:
 Relevant files:
 Technical constraints:
 Acceptance criteria:
 
-Requirements:
-1. Read the code and context first
-2. Implement using the existing stack
-3. Keep changes focused
-4. Run necessary tests
-5. Explain validation results
-6. Commit and push to GitHub
-7. If deployment is required, deploy and provide the URL
+Low-budget collaboration requirements:
+1. ChatGPT has already completed planning; do not redo broad solution exploration
+2. Read the listed relevant files first
+3. Follow the suggested implementation plan
+4. Keep changes focused and avoid unrelated refactors
+5. Run necessary tests and explain validation results
+6. If commit, push, or deployment is required, complete it and report the result
 ```
 
 ## 8. Review Procedure / 验收步骤

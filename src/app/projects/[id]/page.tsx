@@ -106,6 +106,24 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                 {task.acceptanceCriteria ? (
                   <p className="mt-2 text-sm leading-6 text-zinc-600">{task.acceptanceCriteria}</p>
                 ) : null}
+                {task.planningSummary || task.implementationPlan || task.codexBudgetNotes ? (
+                  <details className="mt-3">
+                    <summary className="cursor-pointer text-xs font-medium text-zinc-500">
+                      ChatGPT Handoff
+                    </summary>
+                    <div className="mt-2 space-y-2 rounded-md bg-zinc-50 p-3 text-xs leading-5 text-zinc-700">
+                      {task.planningSummary ? (
+                        <p><span className="font-semibold">规划摘要：</span>{task.planningSummary}</p>
+                      ) : null}
+                      {task.implementationPlan ? (
+                        <p><span className="font-semibold">实现步骤：</span>{task.implementationPlan}</p>
+                      ) : null}
+                      {task.codexBudgetNotes ? (
+                        <p><span className="font-semibold">省额度说明：</span>{task.codexBudgetNotes}</p>
+                      ) : null}
+                    </div>
+                  </details>
+                ) : null}
                 {task.codexPrompt ? (
                   <details className="mt-3">
                     <summary className="cursor-pointer text-xs font-medium text-zinc-500">Codex Prompt</summary>

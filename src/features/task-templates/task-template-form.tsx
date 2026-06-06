@@ -17,6 +17,9 @@ export function TaskTemplateForm({ projectId }: { projectId: string }) {
       title: formData.get("title"),
       goal: formData.get("goal"),
       scope: formData.get("scope"),
+      planningSummary: formData.get("planningSummary"),
+      implementationPlan: formData.get("implementationPlan"),
+      codexBudgetNotes: formData.get("codexBudgetNotes"),
       relatedFiles: formData.get("relatedFiles"),
       acceptanceCriteria: formData.get("acceptanceCriteria"),
       status: formData.get("status"),
@@ -72,6 +75,33 @@ export function TaskTemplateForm({ projectId }: { projectId: string }) {
       <label className="block space-y-2 text-sm font-medium text-zinc-700">
         范围 / Scope
         <textarea name="scope" rows={3} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm" />
+      </label>
+      <label className="block space-y-2 text-sm font-medium text-zinc-700">
+        ChatGPT 规划摘要 / ChatGPT planning summary
+        <textarea
+          name="planningSummary"
+          rows={3}
+          placeholder="说明 ChatGPT 已确认的方案、约束和取舍，Codex 不需要重新探索。"
+          className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+        />
+      </label>
+      <label className="block space-y-2 text-sm font-medium text-zinc-700">
+        建议实现步骤 / Suggested implementation plan
+        <textarea
+          name="implementationPlan"
+          rows={3}
+          placeholder="1. 修改哪些文件；2. 增加哪些字段/API；3. 运行哪些验证。"
+          className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+        />
+      </label>
+      <label className="block space-y-2 text-sm font-medium text-zinc-700">
+        Codex 省额度说明 / Codex budget notes
+        <textarea
+          name="codexBudgetNotes"
+          rows={2}
+          placeholder="只阅读相关文件；不做大范围重构；遇到缺失信息先提出最短问题。"
+          className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+        />
       </label>
       <label className="block space-y-2 text-sm font-medium text-zinc-700">
         相关文件 / Relevant files

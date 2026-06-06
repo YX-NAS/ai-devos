@@ -131,6 +131,9 @@ model Task {
   story              String?
   goal               String?
   scope              String?
+  planningSummary    String?
+  implementationPlan String?
+  codexBudgetNotes   String?
   relatedFiles       String?
   acceptanceCriteria String?
   requiresCommit     Boolean    @default(false)

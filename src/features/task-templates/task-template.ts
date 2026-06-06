@@ -1,6 +1,9 @@
 export const codexTaskTemplateFields = [
   { key: "goal", zh: "目标", en: "Goal" },
   { key: "scope", zh: "范围", en: "Scope" },
+  { key: "planningSummary", zh: "ChatGPT 规划摘要", en: "ChatGPT planning summary" },
+  { key: "implementationPlan", zh: "建议实现步骤", en: "Suggested implementation plan" },
+  { key: "codexBudgetNotes", zh: "Codex 省额度说明", en: "Codex budget notes" },
   { key: "relatedFiles", zh: "相关文件", en: "Relevant files" },
   { key: "acceptanceCriteria", zh: "验收标准", en: "Acceptance criteria" },
   { key: "requiresCommit", zh: "是否需要 commit", en: "Commit required" },
@@ -12,6 +15,9 @@ export type CodexTaskTemplateInput = {
   title: string;
   goal?: string | null;
   scope?: string | null;
+  planningSummary?: string | null;
+  implementationPlan?: string | null;
+  codexBudgetNotes?: string | null;
   relatedFiles?: string | null;
   acceptanceCriteria?: string | null;
   requiresCommit?: boolean;
