@@ -1,0 +1,27 @@
+services:
+  ai-devos:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ai-devos:1.0.0
+    container_name: ai-devos
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: 0.0.0.0
+      DATABASE_URL: file:/app/data/ai-devos.db
+    ports:
+      - "3121:3000"
+    volumes:
+      - ./docker-data:/app/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://127.0.0.1:3000/api/projects >/dev/null 2>&1 || exit 1"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
