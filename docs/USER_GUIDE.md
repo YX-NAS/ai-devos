@@ -1,128 +1,480 @@
-# AI DevOS 使用说明
+# AI DevOS Detailed User Guide / AI DevOS 详细使用说明
 
-AI DevOS 是一个 AI 项目开发总控台，用来把 GPT 的规划工作和 Codex 的工程执行串成一个可追踪、可验收的流程。
+AI DevOS is a development operating system for AI projects. It helps you turn GPT planning into Codex execution, then track implementation, review, and delivery in one workflow.
 
-## 适用场景
+AI DevOS 是一个 AI 项目开发总控台。它帮助你把 GPT 的规划转化为 Codex 的工程执行，并把实现、验收、交付统一纳入一个可追踪流程。
 
-- 同时管理多个 AI 项目
-- 把需求、技术设计、任务拆分和 Codex Prompt 放在一个地方
-- 跟踪项目从 Idea 到 Done 的生命周期
-- 记录 Review、风险和下一步动作
-- 为 GPT 规划和 Codex 执行建立固定交接格式
+## 1. What AI DevOS Does / AI DevOS 用来做什么
 
-## 基本概念
+### 中文
 
-### Project
+AI DevOS 适合用来管理以下内容：
 
-Project 是 AI DevOS 的核心对象。每个项目包含名称、分类、优先级、阶段、GitHub 仓库、当前目标和下一步动作。
+- AI 项目列表
+- 项目需求
+- 技术设计
+- Codex 执行任务
+- GPT / Codex Prompt
+- Review 验收记录
+- 项目生命周期状态
 
-推荐用法：
+它的核心目标是让每个项目都能回答这几个问题：
 
-- 一个 GitHub 仓库对应一个 Project
-- 一个产品、工具、自动化系统或内容项目对应一个 Project
-- 项目名称保持清晰，slug 使用小写英文和短横线
+- 当前项目处于哪个阶段？
+- 当前最重要的目标是什么？
+- 下一步应该做什么？
+- 哪些任务可以交给 Codex？
+- Codex 完成后如何验收？
 
-### Requirement
+### English
 
-Requirement 用来记录项目需求。它适合保存 GPT 输出的产品需求、功能范围和用户故事。
+AI DevOS helps you manage:
 
-推荐用法：
+- AI project portfolio
+- Requirements
+- Technical designs
+- Codex execution tasks
+- GPT / Codex prompts
+- Review records
+- Project lifecycle status
 
-- P0：MVP 必须完成
-- P1：第一版重要能力
-- P2：可排期增强项
-- P3：想法池
+Its core purpose is to make every project answerable:
 
-### Design
+- Which stage is the project in?
+- What is the current goal?
+- What is the next action?
+- Which tasks are ready for Codex?
+- How should Codex output be reviewed?
 
-Design 用来沉淀技术设计、页面原型、API 方案、数据模型和架构说明。
-
-推荐用法：
-
-- 在交给 Codex 前，把核心技术约束写清楚
-- 每轮大改版保留一个新的设计版本
-- 把设计文档作为任务拆分的依据
-
-### Task
-
-Task 是 Codex 执行的最小工作单元。每个任务应尽量包含范围、验收标准和可直接复制给 Codex 的 Prompt。
-
-任务状态含义：
-
-- TODO：待整理或待开始
-- RESEARCH：需要调研
-- DESIGN：需要补设计
-- READY_FOR_CODEX：已经可以交给 Codex
-- IN_PROGRESS：执行中
-- REVIEW：等待验收
-- DONE：已完成
-- BLOCKED：阻塞
-
-### Prompt
-
-Prompt 中心用于保存 GPT 规划 Prompt、Codex 执行 Prompt、Review Prompt 和系统级规则。
-
-推荐用法：
-
-- GPT_PLANNING：需求分析、调研、设计、拆任务
-- CODEX_EXECUTION：代码实现、测试、提交、部署
-- REVIEW：验收、复盘、风险检查
-- SYSTEM：长期规则和协作规范
-
-### Review
-
-Review 用来记录验收结果、检查清单和风险等级。它是从 Codex 执行回到人工决策的重要节点。
-
-### Workflow
-
-Workflow 展示项目从 Idea 到 Done 的标准流转路径：
+## 2. Core Workflow / 核心工作流
 
 ```text
-Idea -> Research -> Design -> Ready for Codex -> In Codex -> Review -> Done
+Idea
+  -> Research
+  -> Design
+  -> Ready for Codex
+  -> In Codex
+  -> Review
+  -> Done
 ```
 
-## 页面使用方法
+### 中文
 
-### Dashboard
+推荐使用顺序：
 
-Dashboard 是全局概览页，用来快速判断当前所有项目的状态。
+1. 在 `Projects` 创建项目
+2. 用 GPT 完成需求分析和技术设计
+3. 把 GPT 输出整理为 `Requirements` 和 `Designs`
+4. 把设计拆分成 `Tasks`
+5. 给每个可执行任务补充 Codex Prompt
+6. 将任务状态设置为 `READY_FOR_CODEX`
+7. 把任务交给 Codex 执行
+8. Codex 完成后进入 `REVIEW`
+9. 人工验收通过后标记为 `DONE`
 
-重点关注：
+### English
+
+Recommended flow:
+
+1. Create a project in `Projects`
+2. Use GPT for requirement analysis and technical design
+3. Convert GPT output into `Requirements` and `Designs`
+4. Break the design into `Tasks`
+5. Add a Codex prompt for each executable task
+6. Set executable tasks to `READY_FOR_CODEX`
+7. Send the task to Codex
+8. Move completed Codex work to `REVIEW`
+9. Mark it as `DONE` after human acceptance
+
+## 3. Tool Configuration / 工具配置
+
+### 3.1 Required Tools / 必需工具
+
+### 中文
+
+本地开发建议准备：
+
+- Node.js 20 或更高版本
+- npm
+- Git
+- GitHub 账号
+- Vercel 账号
+- Codex
+- GPT / ChatGPT
+
+当前项目技术栈：
+
+- Next.js 15
+- TypeScript
+- TailwindCSS
+- Prisma
+- SQLite
+
+### English
+
+Recommended local tools:
+
+- Node.js 20 or later
+- npm
+- Git
+- GitHub account
+- Vercel account
+- Codex
+- GPT / ChatGPT
+
+Current stack:
+
+- Next.js 15
+- TypeScript
+- TailwindCSS
+- Prisma
+- SQLite
+
+### 3.2 Local Environment / 本地环境配置
+
+### 中文
+
+在本地运行项目：
+
+```bash
+git clone https://github.com/YX-NAS/ai-devos.git
+cd ai-devos
+npm install
+cp .env.example .env
+npm run prisma:generate
+npm run db:push
+npm run db:seed
+npm run dev
+```
+
+打开：
+
+```text
+http://127.0.0.1:3000
+```
+
+本地 `.env` 默认配置：
+
+```env
+DATABASE_URL="file:./dev.db"
+```
+
+### English
+
+Run locally:
+
+```bash
+git clone https://github.com/YX-NAS/ai-devos.git
+cd ai-devos
+npm install
+cp .env.example .env
+npm run prisma:generate
+npm run db:push
+npm run db:seed
+npm run dev
+```
+
+Open:
+
+```text
+http://127.0.0.1:3000
+```
+
+Default local `.env`:
+
+```env
+DATABASE_URL="file:./dev.db"
+```
+
+### 3.3 GitHub Configuration / GitHub 配置
+
+### 中文
+
+推荐仓库：
+
+```text
+https://github.com/YX-NAS/ai-devos.git
+```
+
+常用命令：
+
+```bash
+git status
+git add .
+git commit -m "your message"
+git push
+```
+
+如果你要让 Codex 完成某个任务，建议在任务中说明：
+
+- 目标
+- 范围
+- 相关文件
+- 验收标准
+- 是否需要 commit
+- 是否需要 push
+- 是否需要部署
+
+### English
+
+Repository:
+
+```text
+https://github.com/YX-NAS/ai-devos.git
+```
+
+Common commands:
+
+```bash
+git status
+git add .
+git commit -m "your message"
+git push
+```
+
+When assigning work to Codex, include:
+
+- Goal
+- Scope
+- Relevant files
+- Acceptance criteria
+- Whether to commit
+- Whether to push
+- Whether to deploy
+
+### 3.4 Vercel Configuration / Vercel 配置
+
+### 中文
+
+当前项目已经支持 Vercel 部署。
+
+Vercel 项目建议配置：
+
+- Framework Preset: `Next.js`
+- Build Command: `npm run build`
+- Install Command: `npm install`
+- Output Directory: 使用默认值
+- Environment Variable:
+
+```env
+DATABASE_URL=file:/tmp/ai-devos.db
+```
+
+当前 `vercel.json` 已包含：
+
+```json
+{
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "env": {
+    "DATABASE_URL": "file:/tmp/ai-devos.db"
+  }
+}
+```
+
+注意：当前云端版本使用临时 SQLite 数据库，适合演示和流程验证。长期生产使用建议切换到持久化数据库。
+
+### English
+
+The project is already prepared for Vercel deployment.
+
+Recommended Vercel settings:
+
+- Framework Preset: `Next.js`
+- Build Command: `npm run build`
+- Install Command: `npm install`
+- Output Directory: default
+- Environment Variable:
+
+```env
+DATABASE_URL=file:/tmp/ai-devos.db
+```
+
+Current `vercel.json`:
+
+```json
+{
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "env": {
+    "DATABASE_URL": "file:/tmp/ai-devos.db"
+  }
+}
+```
+
+Note: the cloud MVP uses temporary SQLite storage. It is good for demos and workflow validation. For production, use a persistent database.
+
+### 3.5 Recommended Production Database / 推荐生产数据库
+
+### 中文
+
+如果要长期保存真实项目数据，建议改用：
+
+- Vercel Postgres
+- Neon
+- Supabase Postgres
+- Turso
+
+切换数据库时需要调整：
+
+1. `prisma/schema.prisma` 的 datasource provider
+2. Vercel 环境变量 `DATABASE_URL`
+3. 数据迁移脚本
+4. seed 策略
+
+### English
+
+For long-term real data, use:
+
+- Vercel Postgres
+- Neon
+- Supabase Postgres
+- Turso
+
+When switching databases, update:
+
+1. `prisma/schema.prisma` datasource provider
+2. Vercel `DATABASE_URL`
+3. Migration scripts
+4. Seed strategy
+
+## 4. First-Time Setup / 首次使用步骤
+
+### 中文
+
+第一次使用 AI DevOS 时，建议按以下步骤：
+
+1. 打开云端部署地址或本地地址
+2. 进入 `Dashboard`
+3. 确认是否能看到默认项目 `AI DevOS`
+4. 进入 `Projects`
+5. 点击 `New Project`
+6. 填写项目基础信息
+7. 设置项目阶段为 `IDEA` 或 `DESIGN`
+8. 保存项目
+9. 回到 Dashboard 确认项目统计变化
+
+### English
+
+First-time usage:
+
+1. Open the cloud deployment URL or local URL
+2. Go to `Dashboard`
+3. Confirm the default `AI DevOS` project is visible
+4. Go to `Projects`
+5. Click `New Project`
+6. Fill in project metadata
+7. Set project stage to `IDEA` or `DESIGN`
+8. Save the project
+9. Return to Dashboard and confirm stats updated
+
+## 5. Page-by-Page Guide / 页面使用说明
+
+### 5.1 Dashboard / 仪表盘
+
+### 中文
+
+用途：查看全局项目状态。
+
+重点指标：
 
 - 项目总数
-- Ready for Codex 任务数量
-- 进行中任务数量
-- 阻塞项目数量
+- Ready for Codex 任务数
+- 进行中任务数
+- 阻塞项目数
 - 最近任务
-
-每天开始工作时，建议先看 Dashboard，再决定今天推进哪个项目。
-
-### Projects
-
-Projects 页面用于管理所有项目。
 
 使用步骤：
 
+1. 每天开始工作先打开 Dashboard
+2. 查看是否有 `BLOCKED` 项目
+3. 查看是否有 `READY_FOR_CODEX` 任务
+4. 选择今天最重要的项目推进
+5. 进入对应 Project 或 Tasks 页面执行下一步
+
+### English
+
+Purpose: global project status overview.
+
+Key metrics:
+
+- Total projects
+- Ready for Codex tasks
+- In-progress tasks
+- Blocked projects
+- Recent tasks
+
+Steps:
+
+1. Start your day from Dashboard
+2. Check for `BLOCKED` projects
+3. Check for `READY_FOR_CODEX` tasks
+4. Pick the most important project for the day
+5. Open the related Project or Tasks page
+
+### 5.2 Projects / 项目列表
+
+### 中文
+
+用途：集中管理所有 AI 项目。
+
+字段说明：
+
+- Name：项目名称
+- Category：项目分类
+- Priority：优先级
+- Stage：生命周期阶段
+- GitHub：仓库地址
+- Next Action：下一步动作
+- Tasks：任务数量
+
+创建项目步骤：
+
 1. 点击 `New Project`
-2. 填写项目名称、slug、分类、优先级和阶段
-3. 添加 GitHub 仓库地址
-4. 写清当前目标和下一步动作
-5. 保存后进入项目详情页
+2. 输入项目名称
+3. 输入 slug，例如 `ai-devos`
+4. 选择分类
+5. 选择优先级
+6. 选择阶段
+7. 填写 GitHub 仓库
+8. 填写当前目标
+9. 填写下一步动作
+10. 点击保存
 
-项目阶段建议：
+### English
 
-- 新想法：IDEA
-- 需要调研：RESEARCH
-- 正在设计：DESIGN
-- 可以交给 Codex：READY_FOR_CODEX
-- Codex 正在执行：IN_CODEX
-- 等待人工验收：REVIEW
-- 已完成：DONE
-- 卡住：BLOCKED
+Purpose: manage all AI projects.
 
-### Project Detail
+Fields:
 
-项目详情页是单个项目的工作台。
+- Name: project name
+- Category: project category
+- Priority: priority
+- Stage: lifecycle stage
+- GitHub: repository URL
+- Next Action: next action
+- Tasks: task count
+
+Create a project:
+
+1. Click `New Project`
+2. Enter project name
+3. Enter slug, for example `ai-devos`
+4. Select category
+5. Select priority
+6. Select stage
+7. Add GitHub repository
+8. Add current goal
+9. Add next action
+10. Save
+
+### 5.3 Project Detail / 项目详情
+
+### 中文
+
+用途：管理单个项目的生命周期。
 
 重点查看：
 
@@ -132,171 +484,668 @@ Projects 页面用于管理所有项目。
 - Requirements
 - Tasks
 
-推荐节奏：
+推荐执行步骤：
 
-1. 先确认当前目标是否仍然正确
-2. 查看当前未完成任务
-3. 根据任务验收标准交给 Codex
-4. Codex 完成后进入 Review
-5. 验收通过后更新项目阶段和下一步动作
+1. 打开项目详情
+2. 确认当前目标是否准确
+3. 查看任务是否足够清晰
+4. 如果任务不清晰，回到 GPT 补需求和设计
+5. 如果任务清晰，设置为 `READY_FOR_CODEX`
+6. 交给 Codex 执行
+7. Codex 完成后进入 Review
 
-### Tasks
+### English
 
-Tasks 页面是所有项目的任务看板。
+Purpose: manage a single project lifecycle.
 
-推荐用法：
+Focus areas:
 
-- 每天优先查看 READY_FOR_CODEX
-- 把可以执行的任务交给 Codex
-- 把完成后的任务移动到 REVIEW
-- 人工验收后移动到 DONE
-- 遇到缺资料、缺权限、技术不可行时移动到 BLOCKED
+- Current goal
+- Current task
+- Next action
+- Requirements
+- Tasks
 
-一个好的 Codex 任务应该包含：
+Recommended steps:
 
-- 明确目标
-- 具体范围
-- 相关文件或页面
-- 验收标准
-- 是否需要提交、推送或部署
+1. Open project detail
+2. Confirm the current goal
+3. Check if tasks are clear
+4. If tasks are unclear, go back to GPT for requirements and design
+5. If tasks are clear, set them to `READY_FOR_CODEX`
+6. Send them to Codex
+7. Move Codex output to Review
 
-### Prompts
+### 5.4 Tasks / 任务中心
 
-Prompts 页面用于沉淀可复用 Prompt。
+### 中文
 
-推荐保存这些内容：
+用途：按照状态管理所有项目任务。
 
-- 项目初始化 Prompt
-- 功能开发 Prompt
-- Bug fix Prompt
-- Review Prompt
-- 发布前检查 Prompt
-- 长期协作规则
+任务状态：
 
-Prompt 命名建议：
+- `TODO`：待开始
+- `RESEARCH`：需要调研
+- `DESIGN`：需要设计
+- `READY_FOR_CODEX`：可以交给 Codex
+- `IN_PROGRESS`：执行中
+- `REVIEW`：等待验收
+- `DONE`：完成
+- `BLOCKED`：阻塞
+
+日常使用步骤：
+
+1. 打开 `Tasks`
+2. 优先查看 `READY_FOR_CODEX`
+3. 选择一个 P0 或 P1 任务
+4. 复制任务说明和 Codex Prompt
+5. 交给 Codex 执行
+6. 执行完成后检查结果
+7. 将任务移动到 `REVIEW`
+8. 人工验收后移动到 `DONE`
+
+### English
+
+Purpose: manage tasks by status.
+
+Task statuses:
+
+- `TODO`: not started
+- `RESEARCH`: needs research
+- `DESIGN`: needs design
+- `READY_FOR_CODEX`: ready for Codex
+- `IN_PROGRESS`: in progress
+- `REVIEW`: waiting for review
+- `DONE`: completed
+- `BLOCKED`: blocked
+
+Daily steps:
+
+1. Open `Tasks`
+2. Check `READY_FOR_CODEX`
+3. Pick a P0 or P1 task
+4. Copy task details and Codex prompt
+5. Send it to Codex
+6. Review the result
+7. Move it to `REVIEW`
+8. Move it to `DONE` after acceptance
+
+### 5.5 Prompts / Prompt 中心
+
+### 中文
+
+用途：保存可复用的 GPT 和 Codex Prompt。
+
+Prompt 类型：
+
+- `GPT_PLANNING`：GPT 调研、规划、设计
+- `CODEX_EXECUTION`：Codex 工程执行
+- `REVIEW`：验收和复盘
+- `SYSTEM`：长期系统规则
+
+推荐模板：
 
 ```text
-项目名 + 场景 + Agent
+目标：
+范围：
+上下文：
+相关文件：
+验收标准：
+需要提交：
+需要推送：
+需要部署：
 ```
 
-示例：
+### English
+
+Purpose: save reusable GPT and Codex prompts.
+
+Prompt types:
+
+- `GPT_PLANNING`: GPT research, planning, design
+- `CODEX_EXECUTION`: Codex implementation
+- `REVIEW`: acceptance and retrospective
+- `SYSTEM`: long-term system rules
+
+Recommended template:
 
 ```text
-AI DevOS 初始化 Codex Prompt
-AI DevOS Review Prompt
-OpenMAIC 需求拆分 GPT Prompt
+Goal:
+Scope:
+Context:
+Relevant files:
+Acceptance criteria:
+Commit required:
+Push required:
+Deploy required:
 ```
 
-### Agents
+### 5.6 Agents / Agent 分工
 
-Agents 页面展示 GPT、Codex 和 Human 的分工。
+### 中文
+
+用途：明确 GPT、Codex、Human 的职责。
 
 推荐分工：
 
-- GPT：调研、规划、设计、拆任务
-- Codex：实现、测试、提交、部署
-- Human：决策、验收、发布、风险判断
+- GPT：需求分析、调研、技术设计、任务拆分
+- Codex：代码实现、测试、提交、修复、部署
+- Human：目标决策、验收、优先级判断、发布确认
 
-### Workflows
+### English
 
-Workflows 页面展示标准生命周期。它适合在项目混乱时重新对齐阶段。
+Purpose: clarify responsibilities.
 
-如果项目卡住，先判断它卡在哪个阶段：
+Recommended ownership:
 
-- 不知道做什么：回到 RESEARCH
-- 知道做什么但不清楚怎么做：回到 DESIGN
-- 已经清楚怎么做：进入 READY_FOR_CODEX
-- 已完成但不放心：进入 REVIEW
+- GPT: requirements, research, technical design, task breakdown
+- Codex: implementation, tests, commits, fixes, deployment
+- Human: decisions, acceptance, priority, release approval
 
-### Settings
+### 5.7 Workflows / 工作流
 
-Settings 页面目前是 MVP 占位，用来展示默认分类、默认优先级、GitHub 账号和 Codex 使用策略。后续可扩展为可编辑配置。
+### 中文
 
-## 推荐工作流
+用途：帮助项目回到正确生命周期阶段。
 
-### 从一个新想法开始
+当项目混乱时，用这个判断：
 
-1. 在 Projects 创建项目
-2. 阶段设为 IDEA
-3. 把想法交给 GPT 做调研和需求分析
-4. 将 GPT 输出整理成 Requirements
-5. 让 GPT 继续生成技术设计，保存到 Designs
-6. 把设计拆成 Tasks
-7. 给可执行任务补上 Codex Prompt
-8. 把任务状态改为 READY_FOR_CODEX
+- 没想清楚做什么：`RESEARCH`
+- 知道做什么但不知道怎么做：`DESIGN`
+- 设计已经清楚：`READY_FOR_CODEX`
+- Codex 正在执行：`IN_CODEX`
+- 等验收：`REVIEW`
+- 已验收：`DONE`
 
-### 交给 Codex 执行
+### English
 
-1. 打开 Tasks 页面
-2. 找到 READY_FOR_CODEX 任务
-3. 复制任务目标、范围、验收标准和 Codex Prompt
-4. 交给 Codex 执行
-5. Codex 完成后记录结果摘要
-6. 将任务移动到 REVIEW
+Purpose: realign project lifecycle stage.
 
-### 人工验收
+Use this when a project feels messy:
 
-1. 根据 acceptanceCriteria 检查功能
-2. 跑必要测试或构建
-3. 检查页面和 API 是否符合预期
-4. 记录 Review
-5. 验收通过后移动到 DONE
-6. 更新项目 nextAction
+- Unclear what to build: `RESEARCH`
+- Clear what, unclear how: `DESIGN`
+- Design is clear: `READY_FOR_CODEX`
+- Codex is working: `IN_CODEX`
+- Waiting for acceptance: `REVIEW`
+- Accepted: `DONE`
 
-### 发布项目
+### 5.8 Settings / 设置
 
-1. 确认所有 P0 任务为 DONE
-2. 确认没有 BLOCKED 任务
-3. 跑最终验证命令
-4. 推送 GitHub
-5. 部署到 Vercel 或其他平台
-6. 在 Review 中记录发布结果
+### 中文
 
-## 云端使用注意事项
+用途：查看默认配置。MVP 阶段当前为只读占位。
 
-当前 MVP 的云端部署使用临时 SQLite 演示数据：
+后续可扩展：
 
-- 线上页面可用于浏览、演示和流程验证
-- 云端 Serverless 环境的 `/tmp` 数据可能随实例重启而重置
-- 长期生产使用建议接入持久化数据库，例如 Vercel Postgres、Neon、Supabase 或 Turso
+- 默认项目分类
+- 默认优先级
+- GitHub 账号
+- API 地址
+- Codex 使用策略
 
-因此，当前云端版本适合：
+### English
 
-- 展示 MVP
-- 验证页面和流程
-- 体验项目/任务/Prompt 管理结构
+Purpose: view default settings. In the MVP, this page is a read-only placeholder.
 
-不建议直接把它作为长期生产数据源，除非已经替换为持久化数据库。
+Future extensions:
 
-## 本地开发
+- Default project category
+- Default priority
+- GitHub account
+- API endpoint
+- Codex strategy
 
-```bash
-npm install
-cp .env.example .env
-npm run prisma:generate
-npm run db:push
-npm run db:seed
-npm run dev
-```
+## 6. GPT Planning Procedure / GPT 规划步骤
 
-访问：
+### 中文
+
+当你有一个新想法时，先让 GPT 做规划：
+
+1. 描述项目目标
+2. 说明用户是谁
+3. 说明当前约束
+4. 要求 GPT 输出 PRD
+5. 要求 GPT 输出技术设计
+6. 要求 GPT 拆分任务
+7. 把输出写入 AI DevOS
+
+推荐 GPT Prompt：
 
 ```text
-http://127.0.0.1:3000
+请作为产品规划和技术架构助手，帮我把以下想法整理成可交给 Codex 执行的项目计划。
+
+项目目标：
+用户对象：
+核心功能：
+技术约束：
+交付标准：
+
+请输出：
+1. PRD
+2. 技术设计
+3. 数据模型
+4. 页面结构
+5. API 设计
+6. Codex 任务拆分
+7. 每个任务的验收标准
 ```
 
-验证：
+### English
+
+When you have a new idea, ask GPT to plan first:
+
+1. Describe the project goal
+2. Define the target users
+3. Explain constraints
+4. Ask GPT for a PRD
+5. Ask GPT for technical design
+6. Ask GPT to break down tasks
+7. Save the output into AI DevOS
+
+Recommended GPT prompt:
+
+```text
+Act as a product planning and technical architecture assistant. Turn the following idea into a project plan that Codex can execute.
+
+Project goal:
+Target users:
+Core features:
+Technical constraints:
+Delivery standard:
+
+Please output:
+1. PRD
+2. Technical design
+3. Data model
+4. Page structure
+5. API design
+6. Codex task breakdown
+7. Acceptance criteria for each task
+```
+
+## 7. Codex Execution Procedure / Codex 执行步骤
+
+### 中文
+
+交给 Codex 前，任务必须足够清晰。
+
+执行步骤：
+
+1. 打开 AI DevOS 的 `Tasks`
+2. 找到 `READY_FOR_CODEX` 任务
+3. 复制任务标题、范围、验收标准和 Prompt
+4. 在 Codex 中粘贴任务
+5. 要求 Codex 实现、测试、提交
+6. Codex 完成后检查结果
+7. 把执行摘要写入任务
+8. 创建 Review 记录
+
+推荐 Codex Prompt：
+
+```text
+请根据以下任务进行开发，直到验收通过，可以交付。
+
+项目：
+任务：
+范围：
+相关文件：
+技术约束：
+验收标准：
+
+要求：
+1. 先阅读代码和上下文
+2. 按现有技术栈实现
+3. 保持改动范围聚焦
+4. 运行必要测试
+5. 说明验证结果
+6. 提交并推送到 GitHub
+7. 如需部署，请完成部署并给出访问地址
+```
+
+### English
+
+Before sending a task to Codex, make sure it is clear enough.
+
+Steps:
+
+1. Open `Tasks` in AI DevOS
+2. Find a `READY_FOR_CODEX` task
+3. Copy title, scope, acceptance criteria, and prompt
+4. Paste the task into Codex
+5. Ask Codex to implement, test, and commit
+6. Review Codex output
+7. Save execution summary into the task
+8. Create a Review record
+
+Recommended Codex prompt:
+
+```text
+Please develop according to the following task until acceptance passes and the work is ready to deliver.
+
+Project:
+Task:
+Scope:
+Relevant files:
+Technical constraints:
+Acceptance criteria:
+
+Requirements:
+1. Read the code and context first
+2. Implement using the existing stack
+3. Keep changes focused
+4. Run necessary tests
+5. Explain validation results
+6. Commit and push to GitHub
+7. If deployment is required, deploy and provide the URL
+```
+
+## 8. Review Procedure / 验收步骤
+
+### 中文
+
+验收时按以下顺序：
+
+1. 检查任务验收标准
+2. 打开相关页面
+3. 检查数据是否正确
+4. 检查 API 是否返回预期结果
+5. 运行测试或构建
+6. 检查 GitHub 提交
+7. 检查 Vercel 部署
+8. 记录 Review 结果
+
+验收记录建议包含：
+
+- 验收时间
+- 验收人
+- 检查清单
+- 测试结果
+- 风险等级
+- 是否通过
+- 后续动作
+
+### English
+
+Review in this order:
+
+1. Check task acceptance criteria
+2. Open related pages
+3. Check data correctness
+4. Check API responses
+5. Run tests or build
+6. Check GitHub commits
+7. Check Vercel deployment
+8. Record Review result
+
+Recommended Review record:
+
+- Review time
+- Reviewer
+- Checklist
+- Test result
+- Risk level
+- Pass or fail
+- Follow-up actions
+
+## 9. Daily Operating Routine / 每日使用流程
+
+### 中文
+
+每天建议这样使用：
+
+1. 打开 Dashboard
+2. 查看阻塞项目
+3. 查看 Ready for Codex 任务
+4. 选择一个 P0/P1 任务
+5. 交给 Codex 执行
+6. 验收结果
+7. 更新项目下一步动作
+8. 记录当天完成内容
+
+每周建议这样复盘：
+
+1. 查看所有 BLOCKED 项目
+2. 查看所有 REVIEW 任务
+3. 清理不再重要的 P2/P3 任务
+4. 调整项目优先级
+5. 更新下一周目标
+
+### English
+
+Daily routine:
+
+1. Open Dashboard
+2. Check blocked projects
+3. Check Ready for Codex tasks
+4. Pick one P0/P1 task
+5. Send it to Codex
+6. Review the result
+7. Update next action
+8. Record what was completed
+
+Weekly review:
+
+1. Review all BLOCKED projects
+2. Review all REVIEW tasks
+3. Clean up low-value P2/P3 tasks
+4. Adjust project priorities
+5. Update next week's goals
+
+## 10. API Usage / API 使用
+
+### 中文
+
+常用 API：
+
+```http
+GET /api/projects
+POST /api/projects
+GET /api/projects/:id
+PATCH /api/projects/:id
+DELETE /api/projects/:id
+GET /api/tasks
+PATCH /api/tasks/:id/status
+GET /api/prompts
+POST /api/prompts
+```
+
+创建项目示例：
+
+```bash
+curl -X POST http://127.0.0.1:3000/api/projects \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Example AI Project",
+    "slug": "example-ai-project",
+    "description": "A sample AI project",
+    "category": "AI_PRODUCT",
+    "priority": "P1",
+    "stage": "IDEA",
+    "repoName": "YX-NAS/example-ai-project",
+    "repoUrl": "https://github.com/YX-NAS/example-ai-project",
+    "currentGoal": "Complete project planning",
+    "nextAction": "Ask GPT to generate PRD"
+  }'
+```
+
+### English
+
+Common APIs:
+
+```http
+GET /api/projects
+POST /api/projects
+GET /api/projects/:id
+PATCH /api/projects/:id
+DELETE /api/projects/:id
+GET /api/tasks
+PATCH /api/tasks/:id/status
+GET /api/prompts
+POST /api/prompts
+```
+
+Create project example:
+
+```bash
+curl -X POST http://127.0.0.1:3000/api/projects \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Example AI Project",
+    "slug": "example-ai-project",
+    "description": "A sample AI project",
+    "category": "AI_PRODUCT",
+    "priority": "P1",
+    "stage": "IDEA",
+    "repoName": "YX-NAS/example-ai-project",
+    "repoUrl": "https://github.com/YX-NAS/example-ai-project",
+    "currentGoal": "Complete project planning",
+    "nextAction": "Ask GPT to generate PRD"
+  }'
+```
+
+## 11. Validation Commands / 验证命令
+
+### 中文
+
+本地验证：
 
 ```bash
 npm run verify
 ```
 
-## 下一步建议
+单独运行：
 
-- 增加项目编辑能力
-- 增加需求、设计、任务、Prompt 的创建和编辑表单
-- 接入持久化云数据库
-- 增加登录和权限控制
-- 增加 GitHub PR / Issue 集成
-- 增加 Codex Prompt 一键复制
-- 增加 Review 清单模板
+```bash
+npm run lint
+npm run build
+```
+
+数据库初始化：
+
+```bash
+npm run prisma:generate
+npm run db:push
+npm run db:seed
+```
+
+### English
+
+Local validation:
+
+```bash
+npm run verify
+```
+
+Run separately:
+
+```bash
+npm run lint
+npm run build
+```
+
+Database setup:
+
+```bash
+npm run prisma:generate
+npm run db:push
+npm run db:seed
+```
+
+## 12. Troubleshooting / 常见问题
+
+### 中文
+
+问题：页面没有数据。
+
+处理：
+
+```bash
+npm run db:push
+npm run db:seed
+```
+
+问题：Prisma Client 报错。
+
+处理：
+
+```bash
+npm run prisma:generate
+```
+
+问题：Vercel 上数据重置。
+
+原因：当前 MVP 使用 `/tmp` SQLite，Serverless 实例重启后可能重置。
+
+处理：接入持久化数据库。
+
+问题：构建失败。
+
+处理：
+
+```bash
+npm install
+npm run verify
+```
+
+### English
+
+Issue: no data on pages.
+
+Fix:
+
+```bash
+npm run db:push
+npm run db:seed
+```
+
+Issue: Prisma Client error.
+
+Fix:
+
+```bash
+npm run prisma:generate
+```
+
+Issue: data resets on Vercel.
+
+Reason: the MVP uses `/tmp` SQLite. Serverless instances may reset.
+
+Fix: connect a persistent database.
+
+Issue: build fails.
+
+Fix:
+
+```bash
+npm install
+npm run verify
+```
+
+## 13. Recommended Next Improvements / 后续改进建议
+
+### 中文
+
+建议下一步：
+
+1. 接入持久化数据库
+2. 增加登录和权限
+3. 增加项目编辑表单
+4. 增加需求、设计、任务、Prompt 的增删改
+5. 增加 Codex Prompt 一键复制
+6. 接入 GitHub PR 和 Issue
+7. 增加 Review 模板
+8. 增加部署记录
+
+### English
+
+Recommended next steps:
+
+1. Add persistent database
+2. Add authentication and permissions
+3. Add project edit form
+4. Add CRUD for requirements, designs, tasks, and prompts
+5. Add one-click Codex prompt copy
+6. Integrate GitHub PRs and Issues
+7. Add Review templates
+8. Add deployment records

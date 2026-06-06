@@ -33,7 +33,7 @@ Project -> Requirement -> Design -> Task -> Codex Prompt -> Review -> Done
 
 Use the Dashboard to understand global status, Projects to manage each AI project, Tasks to hand executable work to Codex, Prompts to save reusable GPT/Codex instructions, and Reviews to record acceptance results.
 
-For a full user-facing guide, see [docs/USER_GUIDE.md](docs/USER_GUIDE.md).
+For a detailed bilingual step-by-step guide, including tool configuration, GPT planning, Codex execution, Vercel deployment notes, API examples, validation commands, and troubleshooting, see [docs/USER_GUIDE.md](docs/USER_GUIDE.md).
 
 ## Cloud Deployment
 
