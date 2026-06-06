@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ai-devos:1.1.0
+    image: ai-devos:1.2.0
     container_name: ai-devos
     restart: unless-stopped
     environment:
@@ -11,6 +11,7 @@ services:
       PORT: "3000"
       HOSTNAME: 0.0.0.0
       DATABASE_URL: file:/app/data/ai-devos.db
+      AI_DEVOS_ADMIN_PASSWORD: "${AI_DEVOS_ADMIN_PASSWORD:-ai-devos-admin}"
     ports:
       - "3121:3000"
     volumes:
