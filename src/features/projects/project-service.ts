@@ -1,7 +1,9 @@
 import { prisma } from "@/lib/prisma";
+import { ensureDatabase } from "@/lib/bootstrap-db";
 import type { Prisma } from "@prisma/client";
 
-export function listProjects() {
+export async function listProjects() {
+  await ensureDatabase();
   return prisma.project.findMany({
     orderBy: [{ priority: "asc" }, { updatedAt: "desc" }],
     include: {
@@ -18,7 +20,8 @@ export function listProjects() {
   });
 }
 
-export function getProject(id: string) {
+export async function getProject(id: string) {
+  await ensureDatabase();
   return prisma.project.findUnique({
     where: { id },
     include: {
@@ -32,19 +35,23 @@ export function getProject(id: string) {
   });
 }
 
-export function createProject(data: Prisma.ProjectCreateInput) {
+export async function createProject(data: Prisma.ProjectCreateInput) {
+  await ensureDatabase();
   return prisma.project.create({ data });
 }
 
-export function updateProject(id: string, data: Prisma.ProjectUpdateInput) {
+export async function updateProject(id: string, data: Prisma.ProjectUpdateInput) {
+  await ensureDatabase();
   return prisma.project.update({ where: { id }, data });
 }
 
-export function deleteProject(id: string) {
+export async function deleteProject(id: string) {
+  await ensureDatabase();
   return prisma.project.delete({ where: { id } });
 }
 
 export async function getDashboardData() {
+  await ensureDatabase();
   const [projects, tasks] = await Promise.all([
     prisma.project.findMany({
       orderBy: { updatedAt: "desc" },
