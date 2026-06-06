@@ -23,6 +23,22 @@ npm run dev
 
 Open [http://127.0.0.1:3000](http://127.0.0.1:3000).
 
+## Usage
+
+AI DevOS is organized around a simple operating flow:
+
+```text
+Project -> Requirement -> Design -> Task -> Codex Prompt -> Review -> Done
+```
+
+Use the Dashboard to understand global status, Projects to manage each AI project, Tasks to hand executable work to Codex, Prompts to save reusable GPT/Codex instructions, and Reviews to record acceptance results.
+
+For a full user-facing guide, see [docs/USER_GUIDE.md](docs/USER_GUIDE.md).
+
+## Cloud Deployment
+
+The Vercel deployment is suitable for MVP demos and workflow validation. The current cloud setup uses a temporary SQLite database path and auto-seeds demo data when needed. For long-term production use, replace SQLite with a persistent database such as Vercel Postgres, Neon, Supabase, or Turso.
+
 ## Scripts
 
 ```bash
