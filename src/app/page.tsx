@@ -42,6 +42,10 @@ export default async function Home() {
       </section>
 
       <section>
+        <DashboardCharts tasks={tasks} />
+      </section>
+
+      <section>
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-zinc-950">核心项目列表</h2>
           <Link href="/projects" className="flex items-center gap-1 text-sm font-medium text-zinc-700">
