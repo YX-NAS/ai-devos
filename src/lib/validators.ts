@@ -80,7 +80,11 @@ export const taskSchema = z.object({
   requiresPush: z.coerce.boolean().default(false),
   requiresDeployment: z.coerce.boolean().default(false),
   codexPrompt: z.string().optional().nullable(),
-  resultSummary: z.string().optional().nullable()
+  resultSummary: z.string().optional().nullable(),
+  executionResult: z.string().optional().nullable(),
+  commitSha: z.string().optional().nullable(),
+  pullRequestUrl: z.string().optional().nullable(),
+  deployedUrl: z.string().optional().nullable()
 });
 
 export const taskStatusSchema = z.object({
@@ -131,6 +135,16 @@ export const agentConfigSchema = z.object({
   apiKeyRef: z.string().optional().nullable(),
   strategy: z.string().optional().nullable(),
   isDefault: z.coerce.boolean().default(false)
+});
+
+export const deploymentRecordSchema = z.object({
+  taskId: z.string().optional().nullable(),
+  environment: z.string().default("production"),
+  version: z.string().optional().nullable(),
+  status: z.string().default("pending"),
+  url: z.string().optional().nullable(),
+  commitSha: z.string().optional().nullable(),
+  notes: z.string().optional().nullable()
 });
 
 export const projectAgentBindingSchema = z.object({

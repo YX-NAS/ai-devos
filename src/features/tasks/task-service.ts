@@ -50,3 +50,21 @@ export async function updateTaskStatus(id: string, status: TaskStatus) {
   await ensureDatabase();
   return prisma.task.update({ where: { id }, data: { status } });
 }
+
+export async function getTask(id: string) {
+  await ensureDatabase();
+  return prisma.task.findUnique({
+    where: { id },
+    include: { project: true, reviews: true }
+  });
+}
+
+export async function updateTask(id: string, data: Record<string, unknown>) {
+  await ensureDatabase();
+  return prisma.task.update({ where: { id }, data });
+}
+
+export async function deleteTask(id: string) {
+  await ensureDatabase();
+  return prisma.task.delete({ where: { id } });
+}

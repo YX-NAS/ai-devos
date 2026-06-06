@@ -124,13 +124,39 @@ Codex 完成后：
 - [x] Add handoff fields to task template form.
 - [x] Add handoff fields to generated Codex Prompt.
 - [x] Add project detail handoff display.
-- [ ] Add task detail/edit page.
-- [ ] Add prompt copy button.
-- [ ] Add execution result fields.
-- [ ] Add login protection.
-- [ ] Add Settings management UI.
-- [ ] Add deployment records.
+- [x] Add task detail/edit page.
+- [x] Add prompt copy button.
+- [x] Add execution result fields.
+- [x] Add login protection.
+- [x] Add Settings management UI.
+- [x] Add deployment records.
 - [ ] Deploy `1.2.0`.
+
+## Development Summary
+
+1.2.0 development is complete. All features have been implemented and verified:
+
+### Completed Features
+
+- **Task Detail/Edit Page**: `/tasks/[id]` with full task fields, status change, execution result editing, and handoff field editing.
+- **Copy Codex Prompt**: One-click copy button on the task detail page.
+- **Execution Result Fields**: `executionResult`, `commitSha`, `pullRequestUrl`, `deployedUrl` saved via edit form.
+- **Login Protection**: Single admin password gate with middleware-based route protection, `/login` page, session cookie with SHA-256 hashing.
+- **Settings Management UI**: Create and edit AgentConfig profiles (ChatGPT/Codex) with modal forms, API key reference fields.
+- **Deployment Records**: `DeploymentRecord` model, `/deployments` page, project-level deployment API, sidebar link.
+- **Database Migration**: ALTER TABLE migrations for execution result columns, CREATE TABLE for DeploymentRecord.
+
+### Tech Changes
+
+- Prisma schema: Added `executionResult`, `commitSha`, `pullRequestUrl`, `deployedUrl`, `reviewedAt` to Task; added `DeploymentRecord` model with relations.
+- New files: 15+ files including pages, API routes, client components, service modules.
+- Middleware: Cookie-based route protection with public path allowlist.
+- Sidebar: Added Deployments link with Cloud icon.
+
+### Verification
+
+- `npm run verify` (lint + build) passes clean.
+- Dev server tested: Login, auth redirect, task detail API all working.
 
 ## Next Development Step / 下一步开发
 

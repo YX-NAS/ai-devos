@@ -135,6 +135,14 @@ const taskColumnMigrations = [
   { name: "requiresDeployment", statement: `ALTER TABLE "Task" ADD COLUMN "requiresDeployment" BOOLEAN NOT NULL DEFAULT false` }
 ];
 
+const taskExecutionColumnMigrations = [
+  { name: "executionResult", statement: `ALTER TABLE "Task" ADD COLUMN "executionResult" TEXT` },
+  { name: "commitSha", statement: `ALTER TABLE "Task" ADD COLUMN "commitSha" TEXT` },
+  { name: "pullRequestUrl", statement: `ALTER TABLE "Task" ADD COLUMN "pullRequestUrl" TEXT` },
+  { name: "deployedUrl", statement: `ALTER TABLE "Task" ADD COLUMN "deployedUrl" TEXT` },
+  { name: "reviewedAt", statement: `ALTER TABLE "Task" ADD COLUMN "reviewedAt" DATETIME` }
+];
+
 let databaseReady: Promise<void> | null = null;
 
 export function ensureDatabase() {
@@ -150,6 +158,8 @@ async function bootstrapDatabase() {
   }
 
   await migrateTaskColumns();
+  await migrateTaskExecutionColumns();
+  await createDeploymentRecordTable();
 
   const [defaultGpt, defaultCodex] = await ensureDefaultAgentConfigs();
 
@@ -247,6 +257,42 @@ async function bootstrapDatabase() {
       { projectId: project.id, configId: defaultCodex.id, purpose: "EXECUTION" }
     ]
   });
+}
+
+async function migrateTaskExecutionColumns() {
+  const columns = await prisma.$queryRawUnsafe<Array<{ name: string }>>('PRAGMA table_info("Task")');
+  const existingColumns = new Set(columns.map((column) => column.name));
+
+  for (const migration of taskExecutionColumnMigrations) {
+    if (!existingColumns.has(migration.name)) {
+      await prisma.$executeRawUnsafe(migration.statement);
+    }
+  }
+}
+
+async function createDeploymentRecordTable() {
+  const tables = await prisma.$queryRawUnsafe<Array<{ name: string }>>(
+    "SELECT name FROM sqlite_master WHERE type='table' AND name='DeploymentRecord'"
+  );
+  if (tables.length === 0) {
+    await prisma.$executeRawUnsafe(
+      `CREATE TABLE IF NOT EXISTS "DeploymentRecord" (
+        "id" TEXT NOT NULL PRIMARY KEY,
+        "projectId" TEXT NOT NULL,
+        "taskId" TEXT,
+        "environment" TEXT NOT NULL DEFAULT 'production',
+        "version" TEXT,
+        "status" TEXT NOT NULL DEFAULT 'pending',
+        "url" TEXT,
+        "commitSha" TEXT,
+        "notes" TEXT,
+        "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "updatedAt" DATETIME NOT NULL,
+        CONSTRAINT "DeploymentRecord_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+        CONSTRAINT "DeploymentRecord_taskId_fkey" FOREIGN KEY ("taskId") REFERENCES "Task" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+      )`
+    );
+  }
 }
 
 async function ensureProjectDefaultBindings(gptConfigId: string, codexConfigId: string) {

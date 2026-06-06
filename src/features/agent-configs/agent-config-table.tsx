@@ -1,11 +1,12 @@
 import type { AgentConfig, ProjectAgentBinding, Project } from "@prisma/client";
+import type { ReactNode } from "react";
 import { StatusBadge } from "@/components/common/status-badge";
 
 type AgentConfigWithBindings = AgentConfig & {
   bindings?: Array<ProjectAgentBinding & { project?: Project }>;
 };
 
-export function AgentConfigTable({ configs }: { configs: AgentConfigWithBindings[] }) {
+export function AgentConfigTable({ configs, renderAction }: { configs: AgentConfigWithBindings[]; renderAction?: (config: AgentConfigWithBindings) => ReactNode }) {
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       {configs.map((config) => (
@@ -23,6 +24,9 @@ export function AgentConfigTable({ configs }: { configs: AgentConfigWithBindings
             <p className="mt-4 whitespace-pre-wrap text-sm leading-6 text-zinc-600">
               {config.strategy}
             </p>
+          ) : null}
+          {renderAction ? (
+            <div className="mt-4">{renderAction(config)}</div>
           ) : null}
           <div className="mt-4 text-xs text-zinc-500">
             Bound projects: {config.bindings?.length ?? 0}

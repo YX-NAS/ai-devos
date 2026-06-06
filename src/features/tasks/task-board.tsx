@@ -1,4 +1,5 @@
 import type { Task, Project, TaskStatus } from "@prisma/client";
+import Link from "next/link";
 import { taskStatusLabels } from "@/lib/constants";
 import { StatusBadge } from "@/components/common/status-badge";
 
@@ -30,7 +31,7 @@ export function TaskBoard({ tasks }: { tasks: TaskWithProject[] }) {
               {columnTasks.map((task) => (
                 <article key={task.id} className="rounded-md border border-zinc-200 p-3">
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="text-sm font-medium leading-5 text-zinc-950">{task.title}</h3>
+                    <Link href={`/tasks/${task.id}`} className="text-sm font-medium leading-5 text-zinc-950 hover:text-zinc-600">{task.title}</Link>
                     <StatusBadge value={task.priority} className="shrink-0" />
                   </div>
                   {task.description ? (

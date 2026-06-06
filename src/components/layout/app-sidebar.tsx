@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   Bot,
+  Cloud,
   ClipboardList,
   GitBranch,
   LayoutDashboard,
@@ -16,6 +17,7 @@ const navItems = [
   { href: "/prompts", label: "Prompts", icon: Sparkles },
   { href: "/agents", label: "Agents", icon: Bot },
   { href: "/workflows", label: "Workflows", icon: GitBranch },
+  { href: "/deployments", label: "Deployments", icon: Cloud },
   { href: "/settings", label: "Settings", icon: Settings }
 ];
 
