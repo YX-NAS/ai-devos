@@ -39,6 +39,7 @@ For a detailed bilingual step-by-step guide, including tool configuration, GPT p
 
 - `1.0.0`: packaged MVP release. See [docs/10_RELEASE_1_0.md](docs/10_RELEASE_1_0.md).
 - `1.1.0`: ChatGPT/Codex configuration binding, Codex task templates, generated execution prompts, and desktop app scaffold. See [docs/14_RELEASE_1_1.md](docs/14_RELEASE_1_1.md).
+- `1.2.0`: planned executable workflow hub with auth, secure profile management, task execution loop, deployment records, and desktop production preview. See [docs/15_PHASE_1_2_PLAN.md](docs/15_PHASE_1_2_PLAN.md).
 
 ## Docker Deployment
 
