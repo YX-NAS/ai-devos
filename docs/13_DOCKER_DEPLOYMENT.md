@@ -101,6 +101,26 @@ Do not delete this directory unless you intentionally want to reset AI DevOS dat
 
 不要删除该目录，除非你明确要重置 AI DevOS 数据。
 
+### Host Directory Permissions / 宿主机目录权限
+
+The container runs as a non-root user. If you use the bind mount in `docker-compose.yml`, make sure the host data directory is writable by the container user.
+
+容器使用非 root 用户运行。如果使用 `docker-compose.yml` 中的宿主机挂载目录，需要确保容器用户可以写入数据目录。
+
+Before first start:
+
+```bash
+mkdir -p docker-data
+sudo chown -R 1001:1001 docker-data
+```
+
+If `/api/projects` returns HTTP 500 and logs contain `Unable to open the database file`, fix permissions and restart:
+
+```bash
+sudo chown -R 1001:1001 docker-data
+docker compose restart ai-devos
+```
+
 ## Environment Variables / 环境变量
 
 Default:
