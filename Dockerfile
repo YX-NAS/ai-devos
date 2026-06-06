@@ -7,6 +7,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 FROM base AS deps
 RUN apk add --no-cache libc6-compat openssl
 COPY package.json package-lock.json ./
+COPY prisma ./prisma
 RUN npm ci
 
 FROM base AS builder
