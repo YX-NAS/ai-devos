@@ -38,7 +38,7 @@ Host port 3121
 ## Local Build / 本地构建
 
 ```bash
-docker build -t ai-devos:1.0.0 .
+docker build -t ai-devos:1.1.0 .
 ```
 
 Or:

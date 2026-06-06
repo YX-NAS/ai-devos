@@ -69,8 +69,13 @@ export const taskSchema = z.object({
   priority: z.enum(["P0", "P1", "P2", "P3"]).default("P2"),
   epic: z.string().optional().nullable(),
   story: z.string().optional().nullable(),
+  goal: z.string().optional().nullable(),
   scope: z.string().optional().nullable(),
+  relatedFiles: z.string().optional().nullable(),
   acceptanceCriteria: z.string().optional().nullable(),
+  requiresCommit: z.coerce.boolean().default(false),
+  requiresPush: z.coerce.boolean().default(false),
+  requiresDeployment: z.coerce.boolean().default(false),
   codexPrompt: z.string().optional().nullable(),
   resultSummary: z.string().optional().nullable()
 });
@@ -112,4 +117,20 @@ export const workflowEventSchema = z.object({
   toStage: z.string().optional().nullable(),
   title: z.string().min(1),
   description: z.string().optional().nullable()
+});
+
+export const agentConfigSchema = z.object({
+  name: z.string().min(1),
+  provider: z.enum(["CHATGPT", "CODEX", "OPENAI_API", "LOCAL"]),
+  role: z.enum(["GPT", "CODEX", "HUMAN", "SYSTEM"]),
+  model: z.string().optional().nullable(),
+  endpoint: z.string().optional().nullable(),
+  apiKeyRef: z.string().optional().nullable(),
+  strategy: z.string().optional().nullable(),
+  isDefault: z.coerce.boolean().default(false)
+});
+
+export const projectAgentBindingSchema = z.object({
+  configId: z.string().min(1),
+  purpose: z.string().min(1)
 });

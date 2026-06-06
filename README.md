@@ -38,7 +38,7 @@ For a detailed bilingual step-by-step guide, including tool configuration, GPT p
 ## Versions
 
 - `1.0.0`: packaged MVP release. See [docs/10_RELEASE_1_0.md](docs/10_RELEASE_1_0.md).
-- `1.1.0`: planned next phase for ChatGPT/Codex configuration binding, Codex task templates, and desktop app scaffold. See [docs/11_PHASE_1_1_PLAN.md](docs/11_PHASE_1_1_PLAN.md) and [docs/12_PHASE_1_1_DEVELOPMENT_DESIGN.md](docs/12_PHASE_1_1_DEVELOPMENT_DESIGN.md).
+- `1.1.0`: ChatGPT/Codex configuration binding, Codex task templates, generated execution prompts, and desktop app scaffold. See [docs/14_RELEASE_1_1.md](docs/14_RELEASE_1_1.md).
 
 ## Docker Deployment
 
@@ -67,9 +67,12 @@ npm run dev
 npm run verify
 npm run db:push
 npm run db:seed
+npm run desktop:dev
 ```
 
 `npm run verify` runs lint and production build.
+
+`npm run desktop:dev` starts the Tauri desktop development shell.
 
 ## MVP Scope
 

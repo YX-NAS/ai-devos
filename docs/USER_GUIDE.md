@@ -1052,7 +1052,197 @@ npm run db:push
 npm run db:seed
 ```
 
-## 12. Troubleshooting / 常见问题
+## 12. AI DevOS 1.1 Features / AI DevOS 1.1 功能
+
+### 12.1 ChatGPT and Codex Profile Binding / ChatGPT 与 Codex 配置绑定
+
+#### 中文
+
+用途：
+
+- ChatGPT Profile 用于记录需求分析、技术设计、任务拆分策略。
+- Codex Profile 用于记录代码执行、验证、commit、push、部署策略。
+- 当前版本默认创建两个 Profile：`Default ChatGPT Planning` 和 `Default Codex Execution`。
+- `apiKeyRef` 只保存密钥引用名称，不保存明文 API Key。
+
+查看步骤：
+
+1. 打开 `Settings`。
+2. 查看 `ChatGPT Profiles`。
+3. 查看 `Codex Profiles`。
+4. 打开项目详情页。
+5. 查看 `Agent Config Binding` 区域，确认该项目绑定的规划与执行配置。
+
+通过 API 新增 Profile：
+
+```bash
+curl -X POST http://127.0.0.1:3000/api/agent-configs \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Team Codex Executor",
+    "provider": "CODEX",
+    "role": "CODEX",
+    "model": "Codex",
+    "strategy": "先阅读代码，按任务模板实现，运行验证；需要时 commit、push、deploy。"
+  }'
+```
+
+绑定到项目：
+
+```bash
+curl -X POST http://127.0.0.1:3000/api/projects/PROJECT_ID/agent-bindings \
+  -H "Content-Type: application/json" \
+  -d '{
+    "configId": "CONFIG_ID",
+    "purpose": "EXECUTION"
+  }'
+```
+
+#### English
+
+Purpose:
+
+- ChatGPT Profile records requirement analysis, technical design, and task breakdown strategy.
+- Codex Profile records implementation, validation, commit, push, and deployment strategy.
+- The current version creates two default profiles: `Default ChatGPT Planning` and `Default Codex Execution`.
+- `apiKeyRef` stores a secret reference name only. It does not store plaintext API keys.
+
+Steps:
+
+1. Open `Settings`.
+2. Review `ChatGPT Profiles`.
+3. Review `Codex Profiles`.
+4. Open a project detail page.
+5. Check `Agent Config Binding` to confirm the planning and execution profiles for the project.
+
+Create a profile with API:
+
+```bash
+curl -X POST http://127.0.0.1:3000/api/agent-configs \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Team Codex Executor",
+    "provider": "CODEX",
+    "role": "CODEX",
+    "model": "Codex",
+    "strategy": "Read code first, implement from the task template, run validation, then commit, push, and deploy when required."
+  }'
+```
+
+Bind it to a project:
+
+```bash
+curl -X POST http://127.0.0.1:3000/api/projects/PROJECT_ID/agent-bindings \
+  -H "Content-Type: application/json" \
+  -d '{
+    "configId": "CONFIG_ID",
+    "purpose": "EXECUTION"
+  }'
+```
+
+### 12.2 Codex Task Template / Codex 任务模板
+
+#### 中文
+
+创建任务时默认使用任务模板，字段包括：
+
+1. `目标`
+2. `范围`
+3. `相关文件`
+4. `验收标准`
+5. `是否需要 commit`
+6. `是否需要 push`
+7. `是否需要部署`
+
+使用步骤：
+
+1. 打开 `Projects`。
+2. 进入某个项目。
+3. 打开该项目的 `Tasks` 页面。
+4. 在 `Codex Task Template` 表单中填写任务标题、目标、范围、相关文件和验收标准。
+5. 勾选是否需要 `commit`、`push`、`部署`。
+6. 点击 `Create Codex Task`。
+7. 回到项目详情页，展开任务下方的 `Codex Prompt`。
+8. 将生成的 Prompt 交给 Codex 执行。
+
+#### English
+
+New tasks use the Codex task template by default. Fields:
+
+1. `Goal`
+2. `Scope`
+3. `Related files`
+4. `Acceptance criteria`
+5. `Commit required`
+6. `Push required`
+7. `Deployment required`
+
+Steps:
+
+1. Open `Projects`.
+2. Open a project.
+3. Open the project `Tasks` page.
+4. Fill in the `Codex Task Template` form with title, goal, scope, related files, and acceptance criteria.
+5. Select whether commit, push, and deployment are required.
+6. Click `Create Codex Task`.
+7. Return to the project detail page and expand `Codex Prompt`.
+8. Send the generated prompt to Codex for execution.
+
+### 12.3 Desktop App / 桌面应用
+
+#### 中文
+
+当前桌面应用是 Tauri 开发壳，适合本地日常使用和后续封装验证。
+
+依赖：
+
+1. Node.js
+2. npm
+3. Rust
+4. 当前系统对应的 Tauri 依赖
+
+启动：
+
+```bash
+npm install
+npm run desktop:dev
+```
+
+构建桌面包：
+
+```bash
+npm run desktop:build
+```
+
+说明：当前生产桌面包仍需继续评估静态导出、内置本地 Next 服务或云端优先桌面壳方案。
+
+#### English
+
+The current desktop app is a Tauri development shell. It is suitable for local daily usage and future packaging validation.
+
+Requirements:
+
+1. Node.js
+2. npm
+3. Rust
+4. OS-specific Tauri dependencies
+
+Start:
+
+```bash
+npm install
+npm run desktop:dev
+```
+
+Build desktop package:
+
+```bash
+npm run desktop:build
+```
+
+Note: production desktop packaging still needs a follow-up decision between static export, bundled local Next server, or cloud-first desktop shell.
+
+## 13. Troubleshooting / 常见问题
 
 ### 中文
 
@@ -1122,7 +1312,7 @@ npm install
 npm run verify
 ```
 
-## 13. Recommended Next Improvements / 后续改进建议
+## 14. Recommended Next Improvements / 后续改进建议
 
 ### 中文
 

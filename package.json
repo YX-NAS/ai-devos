@@ -1,16 +1,18 @@
 {
   "name": "ai-devos",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "postinstall": "prisma generate",
     "start": "next start",
-    "docker:build": "docker build -t ai-devos:1.0.0 .",
+    "docker:build": "docker build -t ai-devos:1.1.0 .",
     "docker:up": "docker compose up -d --build",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f ai-devos",
+    "desktop:dev": "tauri dev",
+    "desktop:build": "tauri build",
     "lint": "eslint",
     "prisma:generate": "prisma generate",
     "db:push": "node scripts/setup-sqlite.mjs",
@@ -34,6 +36,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@tauri-apps/cli": "^2.11.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

@@ -30,7 +30,8 @@ export async function getProject(id: string) {
       tasks: { orderBy: [{ status: "asc" }, { priority: "asc" }] },
       prompts: { orderBy: { updatedAt: "desc" } },
       reviews: { include: { task: true }, orderBy: { updatedAt: "desc" } },
-      workflows: { orderBy: { createdAt: "asc" } }
+      workflows: { orderBy: { createdAt: "asc" } },
+      agentBindings: { include: { config: true }, orderBy: { createdAt: "asc" } }
     }
   });
 }

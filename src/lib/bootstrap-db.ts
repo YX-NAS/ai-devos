@@ -48,8 +48,13 @@ const schemaStatements = [
     "priority" TEXT NOT NULL DEFAULT 'P2',
     "epic" TEXT,
     "story" TEXT,
+    "goal" TEXT,
     "scope" TEXT,
+    "relatedFiles" TEXT,
     "acceptanceCriteria" TEXT,
+    "requiresCommit" BOOLEAN NOT NULL DEFAULT false,
+    "requiresPush" BOOLEAN NOT NULL DEFAULT false,
+    "requiresDeployment" BOOLEAN NOT NULL DEFAULT false,
     "codexPrompt" TEXT,
     "resultSummary" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -90,7 +95,37 @@ const schemaStatements = [
     "description" TEXT,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "WorkflowEvent_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+  )`,
+  `CREATE TABLE IF NOT EXISTS "AgentConfig" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL,
+    "provider" TEXT NOT NULL,
+    "role" TEXT NOT NULL,
+    "model" TEXT,
+    "endpoint" TEXT,
+    "apiKeyRef" TEXT,
+    "strategy" TEXT,
+    "isDefault" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+  )`,
+  `CREATE TABLE IF NOT EXISTS "ProjectAgentBinding" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "projectId" TEXT NOT NULL,
+    "configId" TEXT NOT NULL,
+    "purpose" TEXT NOT NULL,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "ProjectAgentBinding_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT "ProjectAgentBinding_configId_fkey" FOREIGN KEY ("configId") REFERENCES "AgentConfig" ("id") ON DELETE CASCADE ON UPDATE CASCADE
   )`
+];
+
+const taskColumnMigrations = [
+  { name: "goal", statement: `ALTER TABLE "Task" ADD COLUMN "goal" TEXT` },
+  { name: "relatedFiles", statement: `ALTER TABLE "Task" ADD COLUMN "relatedFiles" TEXT` },
+  { name: "requiresCommit", statement: `ALTER TABLE "Task" ADD COLUMN "requiresCommit" BOOLEAN NOT NULL DEFAULT false` },
+  { name: "requiresPush", statement: `ALTER TABLE "Task" ADD COLUMN "requiresPush" BOOLEAN NOT NULL DEFAULT false` },
+  { name: "requiresDeployment", statement: `ALTER TABLE "Task" ADD COLUMN "requiresDeployment" BOOLEAN NOT NULL DEFAULT false` }
 ];
 
 let databaseReady: Promise<void> | null = null;
@@ -107,8 +142,13 @@ async function bootstrapDatabase() {
     await prisma.$executeRawUnsafe(statement);
   }
 
+  await migrateTaskColumns();
+
+  const [defaultGpt, defaultCodex] = await ensureDefaultAgentConfigs();
+
   const projectCount = await prisma.project.count();
   if (projectCount > 0) {
+    await ensureProjectDefaultBindings(defaultGpt.id, defaultCodex.id);
     return;
   }
 
@@ -152,14 +192,28 @@ async function bootstrapDatabase() {
         title: "初始化 AI DevOS 项目",
         description: "创建 Next.js 项目并初始化 Prisma、基础页面、API 与验收脚本。",
         status: "DONE",
-        priority: "P0"
+        priority: "P0",
+        goal: "完成 AI DevOS 1.0 初始化",
+        scope: "Next.js、Prisma、页面、API、Docker 部署",
+        relatedFiles: "src/app, prisma/schema.prisma, Dockerfile",
+        acceptanceCriteria: "页面和 API 可访问；构建通过；Docker 容器健康。",
+        requiresCommit: true,
+        requiresPush: true,
+        requiresDeployment: true
       },
       {
         projectId: project.id,
         title: "部署 AI DevOS",
         description: "完成线上环境部署并验证页面/API 可访问。",
         status: "READY_FOR_CODEX",
-        priority: "P0"
+        priority: "P0",
+        goal: "完成 AI DevOS 容器化部署",
+        scope: "Docker Compose、Nginx、HTTPS、健康检查",
+        relatedFiles: "docker-compose.yml, docs/13_DOCKER_DEPLOYMENT.md",
+        acceptanceCriteria: "https://codex.5176nas.site 可访问；/api/projects 返回项目数据。",
+        requiresCommit: true,
+        requiresPush: true,
+        requiresDeployment: true
       }
     ]
   });
@@ -173,4 +227,79 @@ async function bootstrapDatabase() {
       tags: "codex,deploy,vercel"
     }
   });
+
+  await prisma.projectAgentBinding.createMany({
+    data: [
+      { projectId: project.id, configId: defaultGpt.id, purpose: "PLANNING" },
+      { projectId: project.id, configId: defaultCodex.id, purpose: "EXECUTION" }
+    ]
+  });
+}
+
+async function ensureProjectDefaultBindings(gptConfigId: string, codexConfigId: string) {
+  const projects = await prisma.project.findMany({ select: { id: true } });
+
+  for (const project of projects) {
+    const planningBinding = await prisma.projectAgentBinding.findFirst({
+      where: { projectId: project.id, purpose: "PLANNING" }
+    });
+    const executionBinding = await prisma.projectAgentBinding.findFirst({
+      where: { projectId: project.id, purpose: "EXECUTION" }
+    });
+
+    if (!planningBinding) {
+      await prisma.projectAgentBinding.create({
+        data: { projectId: project.id, configId: gptConfigId, purpose: "PLANNING" }
+      });
+    }
+
+    if (!executionBinding) {
+      await prisma.projectAgentBinding.create({
+        data: { projectId: project.id, configId: codexConfigId, purpose: "EXECUTION" }
+      });
+    }
+  }
+}
+
+async function migrateTaskColumns() {
+  const columns = await prisma.$queryRawUnsafe<Array<{ name: string }>>('PRAGMA table_info("Task")');
+  const existingColumns = new Set(columns.map((column) => column.name));
+
+  for (const migration of taskColumnMigrations) {
+    if (!existingColumns.has(migration.name)) {
+      await prisma.$executeRawUnsafe(migration.statement);
+    }
+  }
+}
+
+async function ensureDefaultAgentConfigs() {
+  const gpt = await prisma.agentConfig.upsert({
+    where: { id: "default-chatgpt-planning" },
+    update: {},
+    create: {
+      id: "default-chatgpt-planning",
+      name: "Default ChatGPT Planning",
+      provider: "CHATGPT",
+      role: "GPT",
+      model: "ChatGPT",
+      strategy: "需求分析、技术设计、任务拆分，默认输出中文，保留 Codex 可执行上下文。",
+      isDefault: true
+    }
+  });
+
+  const codex = await prisma.agentConfig.upsert({
+    where: { id: "default-codex-execution" },
+    update: {},
+    create: {
+      id: "default-codex-execution",
+      name: "Default Codex Execution",
+      provider: "CODEX",
+      role: "CODEX",
+      model: "Codex",
+      strategy: "先阅读代码，按任务模板实现，运行验证，按需 commit、push、deploy。",
+      isDefault: true
+    }
+  });
+
+  return [gpt, codex] as const;
 }

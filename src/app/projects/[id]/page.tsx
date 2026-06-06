@@ -47,6 +47,33 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
         </div>
       </section>
 
+      <section className="rounded-lg border border-zinc-200 bg-white">
+        <div className="border-b border-zinc-200 px-5 py-4">
+          <h2 className="font-semibold text-zinc-950">Agent Config Binding</h2>
+          <p className="mt-1 text-sm text-zinc-500">项目默认 ChatGPT / Codex 配置，API Key 可选且不在当前页面明文保存。</p>
+        </div>
+        <div className="grid gap-4 p-5 md:grid-cols-2">
+          {project.agentBindings.length > 0 ? (
+            project.agentBindings.map((binding) => (
+              <div key={binding.id} className="rounded-md border border-zinc-200 p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-semibold text-zinc-950">{binding.purpose}</p>
+                  <StatusBadge value={binding.config.role} label={binding.config.provider} />
+                </div>
+                <p className="mt-2 text-sm text-zinc-700">{binding.config.name}</p>
+                {binding.config.strategy ? (
+                  <p className="mt-2 line-clamp-3 text-xs leading-5 text-zinc-500">
+                    {binding.config.strategy}
+                  </p>
+                ) : null}
+              </div>
+            ))
+          ) : (
+            <EmptyState title="暂无 Agent 绑定" description="可在 Settings 创建默认 ChatGPT/Codex 配置后绑定项目。" />
+          )}
+        </div>
+      </section>
+
       <section className="grid gap-4 lg:grid-cols-2">
         <div className="rounded-lg border border-zinc-200 bg-white">
           <div className="border-b border-zinc-200 px-5 py-4">
@@ -78,6 +105,14 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                 </div>
                 {task.acceptanceCriteria ? (
                   <p className="mt-2 text-sm leading-6 text-zinc-600">{task.acceptanceCriteria}</p>
+                ) : null}
+                {task.codexPrompt ? (
+                  <details className="mt-3">
+                    <summary className="cursor-pointer text-xs font-medium text-zinc-500">Codex Prompt</summary>
+                    <pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap rounded-md bg-zinc-50 p-3 text-xs leading-5 text-zinc-700">
+                      {task.codexPrompt}
+                    </pre>
+                  </details>
                 ) : null}
               </div>
             ))}

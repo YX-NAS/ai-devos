@@ -9,6 +9,8 @@ const schema = `
 PRAGMA foreign_keys=OFF;
 
 DROP TABLE IF EXISTS "WorkflowEvent";
+DROP TABLE IF EXISTS "ProjectAgentBinding";
+DROP TABLE IF EXISTS "AgentConfig";
 DROP TABLE IF EXISTS "Review";
 DROP TABLE IF EXISTS "Prompt";
 DROP TABLE IF EXISTS "Task";
@@ -66,8 +68,13 @@ CREATE TABLE "Task" (
   "priority" TEXT NOT NULL DEFAULT 'P2',
   "epic" TEXT,
   "story" TEXT,
+  "goal" TEXT,
   "scope" TEXT,
+  "relatedFiles" TEXT,
   "acceptanceCriteria" TEXT,
+  "requiresCommit" BOOLEAN NOT NULL DEFAULT false,
+  "requiresPush" BOOLEAN NOT NULL DEFAULT false,
+  "requiresDeployment" BOOLEAN NOT NULL DEFAULT false,
   "codexPrompt" TEXT,
   "resultSummary" TEXT,
   "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -113,6 +120,30 @@ CREATE TABLE "WorkflowEvent" (
   CONSTRAINT "WorkflowEvent_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+CREATE TABLE "AgentConfig" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "name" TEXT NOT NULL,
+  "provider" TEXT NOT NULL,
+  "role" TEXT NOT NULL,
+  "model" TEXT,
+  "endpoint" TEXT,
+  "apiKeyRef" TEXT,
+  "strategy" TEXT,
+  "isDefault" BOOLEAN NOT NULL DEFAULT false,
+  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" DATETIME NOT NULL
+);
+
+CREATE TABLE "ProjectAgentBinding" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "projectId" TEXT NOT NULL,
+  "configId" TEXT NOT NULL,
+  "purpose" TEXT NOT NULL,
+  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "ProjectAgentBinding_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "ProjectAgentBinding_configId_fkey" FOREIGN KEY ("configId") REFERENCES "AgentConfig" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
 CREATE INDEX "Requirement_projectId_idx" ON "Requirement"("projectId");
 CREATE INDEX "DesignDocument_projectId_idx" ON "DesignDocument"("projectId");
 CREATE INDEX "Task_projectId_idx" ON "Task"("projectId");
@@ -120,6 +151,8 @@ CREATE INDEX "Prompt_projectId_idx" ON "Prompt"("projectId");
 CREATE INDEX "Review_projectId_idx" ON "Review"("projectId");
 CREATE INDEX "Review_taskId_idx" ON "Review"("taskId");
 CREATE INDEX "WorkflowEvent_projectId_idx" ON "WorkflowEvent"("projectId");
+CREATE INDEX "ProjectAgentBinding_projectId_idx" ON "ProjectAgentBinding"("projectId");
+CREATE INDEX "ProjectAgentBinding_configId_idx" ON "ProjectAgentBinding"("configId");
 
 PRAGMA foreign_keys=ON;
 `;

@@ -4,6 +4,8 @@ const prisma = new PrismaClient();
 
 async function main() {
   await prisma.workflowEvent.deleteMany();
+  await prisma.projectAgentBinding.deleteMany();
+  await prisma.agentConfig.deleteMany();
   await prisma.review.deleteMany();
   await prisma.prompt.deleteMany();
   await prisma.task.deleteMany();
@@ -41,6 +43,38 @@ async function main() {
       currentGoal: "整理评审反馈",
       nextAction: "合并验收清单"
     }
+  });
+
+  const defaultGpt = await prisma.agentConfig.create({
+    data: {
+      id: "default-chatgpt-planning",
+      name: "Default ChatGPT Planning",
+      provider: "CHATGPT",
+      role: "GPT",
+      model: "ChatGPT",
+      strategy: "需求分析、技术调研、PRD、技术设计和任务拆分，默认输出中文。",
+      isDefault: true
+    }
+  });
+
+  const defaultCodex = await prisma.agentConfig.create({
+    data: {
+      id: "default-codex-execution",
+      name: "Default Codex Execution",
+      provider: "CODEX",
+      role: "CODEX",
+      model: "Codex",
+      strategy: "按任务模板执行，实现、验证、总结，并根据任务要求 commit、push、deploy。",
+      isDefault: true
+    }
+  });
+
+  await prisma.projectAgentBinding.createMany({
+    data: [
+      { projectId: aiDevos.id, configId: defaultGpt.id, purpose: "PLANNING" },
+      { projectId: aiDevos.id, configId: defaultCodex.id, purpose: "EXECUTION" },
+      { projectId: openMaic.id, configId: defaultGpt.id, purpose: "PLANNING" }
+    ]
   });
 
   await prisma.requirement.createMany({
@@ -85,8 +119,13 @@ async function main() {
       priority: "P0",
       epic: "Epic 1",
       story: "Story 1.1",
+      goal: "完成 AI DevOS MVP 初始化",
       scope: "项目初始化、目录结构、基础页面、API、种子数据",
+      relatedFiles: "src/app, src/features, prisma/schema.prisma, README.md",
       acceptanceCriteria: "项目可启动；lint 通过；build 通过；基础页面和 API 可访问。",
+      requiresCommit: true,
+      requiresPush: true,
+      requiresDeployment: true,
       codexPrompt: "请初始化 AI DevOS 项目，并创建基础目录结构、数据模型与页面。"
     }
   });
@@ -98,7 +137,14 @@ async function main() {
         title: "生成 Codex Prompt 模板",
         description: "把需求、设计、验收标准组织为可执行 Prompt。",
         status: "DESIGN",
-        priority: "P1"
+        priority: "P1",
+        goal: "建立标准 Codex 任务模板",
+        scope: "任务字段、Prompt 生成、验收要求",
+        relatedFiles: "src/features/task-templates, src/features/tasks",
+        acceptanceCriteria: "创建任务时可填写模板字段，并生成 Codex Prompt。",
+        requiresCommit: true,
+        requiresPush: true,
+        requiresDeployment: true
       },
       {
         projectId: openMaic.id,

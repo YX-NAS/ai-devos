@@ -62,6 +62,13 @@ enum PromptType {
   SYSTEM
 }
 
+enum AgentProvider {
+  CHATGPT
+  CODEX
+  OPENAI_API
+  LOCAL
+}
+
 model Project {
   id          String          @id @default(cuid())
   name        String
@@ -84,6 +91,7 @@ model Project {
   prompts      Prompt[]
   reviews      Review[]
   workflows    WorkflowEvent[]
+  agentBindings ProjectAgentBinding[]
 }
 
 model Requirement {
@@ -121,8 +129,13 @@ model Task {
   priority           Priority   @default(P2)
   epic               String?
   story              String?
+  goal               String?
   scope              String?
+  relatedFiles       String?
   acceptanceCriteria String?
+  requiresCommit     Boolean    @default(false)
+  requiresPush       Boolean    @default(false)
+  requiresDeployment Boolean    @default(false)
   codexPrompt        String?
   resultSummary      String?
   createdAt          DateTime   @default(now())
@@ -171,4 +184,31 @@ model WorkflowEvent {
   createdAt   DateTime  @default(now())
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model AgentConfig {
+  id        String        @id @default(cuid())
+  name      String
+  provider  AgentProvider
+  role      AgentType
+  model     String?
+  endpoint  String?
+  apiKeyRef String?
+  strategy  String?
+  isDefault Boolean       @default(false)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  bindings ProjectAgentBinding[]
+}
+
+model ProjectAgentBinding {
+  id        String   @id @default(cuid())
+  projectId String
+  configId  String
+  purpose   String
+  createdAt DateTime @default(now())
+
+  project Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  config  AgentConfig @relation(fields: [configId], references: [id], onDelete: Cascade)
 }
