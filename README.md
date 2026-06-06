@@ -35,6 +35,11 @@ Use the Dashboard to understand global status, Projects to manage each AI projec
 
 For a detailed bilingual step-by-step guide, including tool configuration, GPT planning, Codex execution, Vercel deployment notes, API examples, validation commands, and troubleshooting, see [docs/USER_GUIDE.md](docs/USER_GUIDE.md).
 
+## Versions
+
+- `1.0.0`: packaged MVP release. See [docs/10_RELEASE_1_0.md](docs/10_RELEASE_1_0.md).
+- `1.1.0`: planned next phase for ChatGPT/Codex configuration binding, Codex task templates, and desktop app scaffold. See [docs/11_PHASE_1_1_PLAN.md](docs/11_PHASE_1_1_PLAN.md) and [docs/12_PHASE_1_1_DEVELOPMENT_DESIGN.md](docs/12_PHASE_1_1_DEVELOPMENT_DESIGN.md).
+
 ## Cloud Deployment
 
 The Vercel deployment is suitable for MVP demos and workflow validation. The current cloud setup uses a temporary SQLite database path and auto-seeds demo data when needed. For long-term production use, replace SQLite with a persistent database such as Vercel Postgres, Neon, Supabase, or Turso.
