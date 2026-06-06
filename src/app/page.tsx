@@ -6,6 +6,7 @@ import { getDashboardData } from "@/features/projects/project-service";
 import { StatusBadge } from "@/components/common/status-badge";
 import { taskStatusLabels } from "@/lib/constants";
 import { formatDate } from "@/lib/utils";
+import { DashboardCharts } from "@/features/charts/dashboard-charts";
 
 export const dynamic = "force-dynamic";
 
