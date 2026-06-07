@@ -17,11 +17,50 @@ const AGENT_ROLE_OPTIONS = [
   { value: "CODEX", label: "Codex" }
 ] as const;
 
+const AUTH_MODE_OPTIONS = [
+  { value: "API_KEY", label: "API Key" },
+  { value: "ACCOUNT_LOGIN", label: "账号登录" }
+] as const;
+
+function AuthModeSelector({
+  value,
+  name,
+  onChange
+}: {
+  value: string;
+  name: string;
+  onChange: (val: string) => void;
+}) {
+  return (
+    <label className="block space-y-1.5 text-sm font-medium text-zinc-700">
+      授权模式
+      <div className="mt-1.5 flex gap-1 rounded-md border border-zinc-300 bg-zinc-100 p-0.5">
+        {AUTH_MODE_OPTIONS.map((opt) => (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => onChange(opt.value)}
+            className={`flex-1 rounded-sm px-3 py-1.5 text-xs font-medium transition-colors ${
+              value === opt.value
+                ? "bg-white text-zinc-950 shadow-sm"
+                : "text-zinc-500 hover:text-zinc-700"
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+      <input type="hidden" name={name} value={value} />
+    </label>
+  );
+}
+
 export function CreateProfileForm() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [authMode, setAuthMode] = useState<string>("ACCOUNT_LOGIN");
 
   async function onSubmit(formData: FormData) {
     setIsSaving(true);
@@ -32,7 +71,8 @@ export function CreateProfileForm() {
       provider: formData.get("provider"),
       role: formData.get("role"),
       model: formData.get("model") || null,
-      apiKeyRef: formData.get("apiKeyRef") || null,
+      authMode: formData.get("authMode"),
+      apiKeyRef: authMode === "API_KEY" ? (formData.get("apiKeyRef") || null) : null,
       strategy: formData.get("strategy") || null,
       isDefault: formData.get("isDefault") === "on"
     };
@@ -102,10 +142,15 @@ export function CreateProfileForm() {
           <input name="model" placeholder="ChatGPT / gpt-5" className="h-9 w-full rounded-md border border-zinc-300 px-2.5 text-sm" />
         </label>
       </div>
-      <label className="mt-3 block space-y-1 text-sm font-medium text-zinc-700">
-        API Key Reference
-        <input name="apiKeyRef" placeholder="OPENAI_API_KEY (not the value)" className="h-9 w-full rounded-md border border-zinc-300 px-2.5 text-sm" />
-      </label>
+      <div className="mt-3">
+        <AuthModeSelector name="authMode" value={authMode} onChange={setAuthMode} />
+      </div>
+      {authMode === "API_KEY" ? (
+        <label className="mt-3 block space-y-1 text-sm font-medium text-zinc-700">
+          API Key Reference
+          <input name="apiKeyRef" placeholder="OPENAI_API_KEY (not the value)" className="h-9 w-full rounded-md border border-zinc-300 px-2.5 text-sm" />
+        </label>
+      ) : null}
       <label className="mt-3 block space-y-1 text-sm font-medium text-zinc-700">
         Strategy
         <textarea name="strategy" rows={2} className="w-full rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm" />
@@ -132,6 +177,7 @@ export function EditProfileButton({ config }: { config: AgentConfig }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [authMode, setAuthMode] = useState<string>(config.authMode ?? "ACCOUNT_LOGIN");
 
   async function onSubmit(formData: FormData) {
     setIsSaving(true);
@@ -142,7 +188,8 @@ export function EditProfileButton({ config }: { config: AgentConfig }) {
       provider: formData.get("provider"),
       role: formData.get("role"),
       model: formData.get("model") || null,
-      apiKeyRef: formData.get("apiKeyRef") || null,
+      authMode: formData.get("authMode"),
+      apiKeyRef: authMode === "API_KEY" ? (formData.get("apiKeyRef") || null) : null,
       strategy: formData.get("strategy") || null,
       isDefault: formData.get("isDefault") === "on"
     };
@@ -168,7 +215,10 @@ export function EditProfileButton({ config }: { config: AgentConfig }) {
     <>
       <button
         type="button"
-        onClick={() => setIsOpen(true)}
+        onClick={() => {
+          setAuthMode(config.authMode ?? "ACCOUNT_LOGIN");
+          setIsOpen(true);
+        }}
         className="inline-flex h-7 items-center gap-1 rounded-md border border-zinc-200 px-2 text-xs text-zinc-500 hover:bg-zinc-50 hover:text-zinc-700"
       >
         <Pencil className="h-3 w-3" />
@@ -211,10 +261,13 @@ export function EditProfileButton({ config }: { config: AgentConfig }) {
                   <input name="model" defaultValue={config.model ?? ""} className="h-9 w-full rounded-md border border-zinc-300 px-2.5 text-sm" />
                 </label>
               </div>
-              <label className="block space-y-1 text-sm font-medium text-zinc-700">
-                API Key Ref
-                <input name="apiKeyRef" defaultValue={config.apiKeyRef ?? ""} className="h-9 w-full rounded-md border border-zinc-300 px-2.5 text-sm" />
-              </label>
+              <AuthModeSelector name="authMode" value={authMode} onChange={setAuthMode} />
+              {authMode === "API_KEY" ? (
+                <label className="block space-y-1 text-sm font-medium text-zinc-700">
+                  API Key Ref
+                  <input name="apiKeyRef" defaultValue={config.apiKeyRef ?? ""} className="h-9 w-full rounded-md border border-zinc-300 px-2.5 text-sm" />
+                </label>
+              ) : null}
               <label className="block space-y-1 text-sm font-medium text-zinc-700">
                 Strategy
                 <textarea name="strategy" rows={2} defaultValue={config.strategy ?? ""} className="w-full rounded-md border border-zinc-300 px-2.5 py-1.5 text-sm" />

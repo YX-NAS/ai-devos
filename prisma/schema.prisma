@@ -69,6 +69,11 @@ enum AgentProvider {
   LOCAL
 }
 
+enum AuthMode {
+  API_KEY
+  ACCOUNT_LOGIN
+}
+
 model Project {
   id          String          @id @default(cuid())
   name        String
@@ -221,6 +226,7 @@ model AgentConfig {
   model     String?
   endpoint  String?
   apiKeyRef String?
+  authMode  AuthMode   @default(ACCOUNT_LOGIN)
   strategy  String?
   isDefault Boolean       @default(false)
   createdAt DateTime      @default(now())

@@ -107,6 +107,7 @@ const schemaStatements = [
     "model" TEXT,
     "endpoint" TEXT,
     "apiKeyRef" TEXT,
+    "authMode" TEXT NOT NULL DEFAULT 'ACCOUNT_LOGIN',
     "strategy" TEXT,
     "isDefault" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -135,6 +136,10 @@ const taskColumnMigrations = [
   { name: "requiresDeployment", statement: `ALTER TABLE "Task" ADD COLUMN "requiresDeployment" BOOLEAN NOT NULL DEFAULT false` }
 ];
 
+const agentConfigAuthModeMigration = [
+  { name: "authMode", statement: `ALTER TABLE "AgentConfig" ADD COLUMN "authMode" TEXT NOT NULL DEFAULT 'API_KEY'` }
+];
+
 const taskExecutionColumnMigrations = [
   { name: "executionResult", statement: `ALTER TABLE "Task" ADD COLUMN "executionResult" TEXT` },
   { name: "commitSha", statement: `ALTER TABLE "Task" ADD COLUMN "commitSha" TEXT` },
@@ -158,6 +163,7 @@ async function bootstrapDatabase() {
   }
 
   await migrateTaskColumns();
+  await migrateAgentConfigAuthMode();
   await migrateTaskExecutionColumns();
   await createDeploymentRecordTable();
 
@@ -259,6 +265,17 @@ async function bootstrapDatabase() {
   });
 }
 
+async function migrateAgentConfigAuthMode() {
+  const columns = await prisma.$queryRawUnsafe<Array<{ name: string }>>('PRAGMA table_info("AgentConfig")');
+  const existingColumns = new Set(columns.map((column) => column.name));
+
+  for (const migration of agentConfigAuthModeMigration) {
+    if (!existingColumns.has(migration.name)) {
+      await prisma.$executeRawUnsafe(migration.statement);
+    }
+  }
+}
+
 async function migrateTaskExecutionColumns() {
   const columns = await prisma.$queryRawUnsafe<Array<{ name: string }>>('PRAGMA table_info("Task")');
   const existingColumns = new Set(columns.map((column) => column.name));
@@ -334,7 +351,7 @@ async function migrateTaskColumns() {
 async function ensureDefaultAgentConfigs() {
   const gpt = await prisma.agentConfig.upsert({
     where: { id: "default-chatgpt-planning" },
-    update: {},
+    update: { authMode: "ACCOUNT_LOGIN" },
     create: {
       id: "default-chatgpt-planning",
       name: "Default ChatGPT Planning",
@@ -342,13 +359,14 @@ async function ensureDefaultAgentConfigs() {
       role: "GPT",
       model: "ChatGPT",
       strategy: "需求分析、技术设计、任务拆分，默认输出中文，保留 Codex 可执行上下文。",
+      authMode: "ACCOUNT_LOGIN",
       isDefault: true
     }
   });
 
   const codex = await prisma.agentConfig.upsert({
     where: { id: "default-codex-execution" },
-    update: {},
+    update: { authMode: "ACCOUNT_LOGIN" },
     create: {
       id: "default-codex-execution",
       name: "Default Codex Execution",
@@ -356,6 +374,7 @@ async function ensureDefaultAgentConfigs() {
       role: "CODEX",
       model: "Codex",
       strategy: "先阅读代码，按任务模板实现，运行验证，按需 commit、push、deploy。",
+      authMode: "ACCOUNT_LOGIN",
       isDefault: true
     }
   });

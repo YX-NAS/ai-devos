@@ -15,7 +15,7 @@ export function AgentConfigTable({ configs, renderAction }: { configs: AgentConf
             <div>
               <h2 className="font-semibold text-zinc-950">{config.name}</h2>
               <p className="mt-1 text-sm text-zinc-500">
-                {config.provider} · {config.role} · {config.model ?? "No model"}
+                {config.provider} · {config.role} · {config.model ?? "No model"} · {config.authMode === "ACCOUNT_LOGIN" ? "账号登录" : "API Key"}
               </p>
             </div>
             {config.isDefault ? <StatusBadge value="DONE" label="Default" /> : null}

@@ -133,6 +133,7 @@ export const agentConfigSchema = z.object({
   model: z.string().optional().nullable(),
   endpoint: z.string().optional().nullable(),
   apiKeyRef: z.string().optional().nullable(),
+  authMode: z.enum(["API_KEY", "ACCOUNT_LOGIN"]).default("ACCOUNT_LOGIN"),
   strategy: z.string().optional().nullable(),
   isDefault: z.coerce.boolean().default(false)
 });
