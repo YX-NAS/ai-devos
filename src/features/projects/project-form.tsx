@@ -22,7 +22,7 @@ export function ProjectForm() {
 
     if (!response.ok) {
       setIsSaving(false);
-      setError("保存失败，请检查 slug 是否唯一，URL 是否合法。");
+      setError("保存失败：请确认 slug 没有重复且只包含小写英文、数字和短横线；Repo URL 需要是完整链接，或直接留空。");
       return;
     }
 
@@ -41,7 +41,17 @@ export function ProjectForm() {
         </label>
         <label className="space-y-2 text-sm font-medium text-zinc-700">
           Slug
-          <input name="slug" required pattern="[a-z0-9-]+" className="h-10 w-full rounded-md border border-zinc-300 px-3 text-sm" />
+          <input
+            name="slug"
+            required
+            pattern="[a-z0-9-]+"
+            placeholder="my-project-01"
+            title="只能使用小写英文、数字和短横线，例如 my-project-01"
+            className="h-10 w-full rounded-md border border-zinc-300 px-3 text-sm"
+          />
+          <span className="block text-xs leading-5 text-zinc-500">
+            唯一项目标识，只能用小写英文、数字和短横线；不能重复，例如 `ai-devos`。
+          </span>
         </label>
         <label className="space-y-2 text-sm font-medium text-zinc-700">
           分类
@@ -91,7 +101,15 @@ export function ProjectForm() {
         </label>
         <label className="space-y-2 text-sm font-medium text-zinc-700">
           Repo URL
-          <input name="repoUrl" placeholder="https://github.com/YX-NAS/ai-devos" className="h-10 w-full rounded-md border border-zinc-300 px-3 text-sm" />
+          <input
+            name="repoUrl"
+            type="url"
+            placeholder="https://github.com/YX-NAS/ai-devos"
+            className="h-10 w-full rounded-md border border-zinc-300 px-3 text-sm"
+          />
+          <span className="block text-xs leading-5 text-zinc-500">
+            可留空；如填写必须是完整 URL，需要包含 `https://`。
+          </span>
         </label>
       </div>
       <label className="block space-y-2 text-sm font-medium text-zinc-700">
