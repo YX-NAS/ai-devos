@@ -116,17 +116,17 @@ export async function POST(request: Request) {
 }
 
 async function bindDefaultAgents(projectId: string) {
-  const defaultConfigs = await db.agentConfig.findMany({
+  const defaultConfigs = await prisma.agentConfig.findMany({
     where: { isDefault: true }
   });
   
   for (const config of defaultConfigs) {
     const purpose = config.role === "GPT" ? "PLANNING" : "EXECUTION";
-    const existing = await db.projectAgentBinding.findFirst({
+    const existing = await prisma.projectAgentBinding.findFirst({
       where: { projectId, configId: config.id }
     });
     if (!existing) {
-      await db.projectAgentBinding.create({
+      await prisma.projectAgentBinding.create({
         data: { projectId, configId: config.id, purpose }
       });
     }
