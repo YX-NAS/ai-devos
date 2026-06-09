@@ -1,4 +1,7 @@
-import { exec } from "node:child_process";
+import { execSync } from "node:child_process";
+import { writeFileSync, unlinkSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 const CODEX_BIN = "/Applications/Codex.app/Contents/Resources/codex";
 const DEFAULT_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
@@ -18,41 +21,36 @@ export async function execCodex(
     workdir?: string;
   }
 ): Promise<CodexExecResult> {
-  return new Promise((resolve) => {
-    const timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
-    let resolved = false;
-
-    const timer = setTimeout(() => {
-      if (!resolved) {
-        resolved = true;
-        resolve({ stdout: "", stderr: "timeout", exitCode: null, timedOut: true });
-      }
-    }, timeoutMs);
-
-    // Write prompt to stdin via heredoc-style echo pipe
-    const escapedPrompt = prompt.replace(/\\/g, "\\\\").replace(/'/g, "'\\''");
-    const cmd = `echo '${escapedPrompt}' | ${CODEX_BIN} exec -`;
-
-    exec(cmd, {
-      cwd: options?.workdir ?? process.cwd(),
-      timeout: timeoutMs,
-      maxBuffer: 10 * 1024 * 1024, // 10 MB
-      env: { ...process.env, ...(options?.config ?? {}) }
-    }, (error, stdout, stderr) => {
-      if (!resolved) {
-        resolved = true;
-        clearTimeout(timer);
-        resolve({
-          stdout: stdout || "",
-          stderr: stderr || "",
-          exitCode: error ? (error as NodeJS.ErrnoException).code || -1 : 0,
-          timedOut: false
-        });
-      }
-    });
-  });
-}
-export function generatePlanningPrompt(goal: string, scope?: string): string {
+  const timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  
+  // Write prompt to temp file to avoid stdin pipe issues
+  const tmpFile = join(tmpdir(), `codex-prompt-${Date.now()}.txt`);
+  try {
+    writeFileSync(tmpFile, prompt, "utf-8");
+    
+    const cmd = `${CODEX_BIN} exec - < "${tmpFile}"`;
+    
+    try {
+      const stdout = execSync(cmd, {
+        cwd: options?.workdir ?? process.cwd(),
+        timeout: timeoutMs,
+        maxBuffer: 10 * 1024 * 1024,
+        encoding: "utf-8",
+        env: { ...process.env, ...(options?.config ?? {}) }
+      });
+      return { stdout: stdout || "", stderr: "", exitCode: 0, timedOut: false };
+    } catch (err: any) {
+      return {
+        stdout: err.stdout || "",
+        stderr: err.stderr || err.message || "",
+        exitCode: err.status || -1,
+        timedOut: err.killed || false
+      };
+    }
+  } finally {
+    try { unlinkSync(tmpFile); } catch {}
+  }
+}export function generatePlanningPrompt(goal: string, scope?: string): string {
   return [
     "你是一个 AI DevOS 规划助手。请对以下目标进行任务分解。",
     "务必使用以下精确格式输出，每个任务使用 ### 开头：",
