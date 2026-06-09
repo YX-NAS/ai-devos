@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { execCodex, generatePlanningPrompt } from "@/features/codex-exec/codex-exec-service";
+import { execCodex } from "@/features/codex-exec/codex-exec-service";
+import { generatePlanningPrompt } from "@/features/codex-exec/planning-prompt";
 import { parsePlanningOutput } from "@/features/codex-exec/planning-parser";
 import { prisma } from "@/lib/prisma";
 import { ensureDatabase } from "@/lib/bootstrap-db";
