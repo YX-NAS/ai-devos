@@ -71,7 +71,7 @@ function extractSection(text: string, heading: string, fallback: string): string
 
 function extractTasks(text: string): ParsedTask[] {
   const tasks: ParsedTask[] = [];
-  let blocks: { title: string; block: string }[] = [];
+  const blocks: { title: string; block: string }[] = [];
   
   // Strategy 1: ### 任务 N: title (Chinese)
   let headerRegex = /###\s*任务\s*(\d+)[:：]\s*(.+)/g;
