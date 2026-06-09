@@ -71,39 +71,75 @@ function extractSection(text: string, heading: string, fallback: string): string
 
 function extractTasks(text: string): ParsedTask[] {
   const tasks: ParsedTask[] = [];
+  let blocks: { title: string; block: string }[] = [];
   
-  // Split text into task blocks using ### 任务 N: markers
-  const headerRegex = /###\s*任务\s*(\d+)[:：]\s*(.+)/g;
-  const headers = [...text.matchAll(headerRegex)];
+  // Strategy 1: ### 任务 N: title (Chinese)
+  let headerRegex = /###\s*任务\s*(\d+)[:：]\s*(.+)/g;
+  let matches = [...text.matchAll(headerRegex)];
+  if (matches.length > 0) {
+    for (const m of matches) {
+      const headerPos = text.indexOf(m[0]);
+      const after = text.slice(headerPos + m[0].length);
+      const next = after.search(/\n###\s*任务|\n##\s|\n---/);
+      blocks.push({ title: m[2].trim(), block: next >= 0 ? after.slice(0, next) : after });
+    }
+  }
   
-  for (const header of headers) {
-    const taskNum = header[1];
-    const title = (header[2] || '').trim();
-    
-    // Find the block for this task by locating from the header to next header or ## section
-    const headerPos = text.indexOf(header[0]);
-    const afterHeader = text.slice(headerPos + header[0].length);
-    const nextHeader = afterHeader.search(/\n###\s*任务|\n##\s|\n---/);
-    const block = nextHeader >= 0 ? afterHeader.slice(0, nextHeader) : afterHeader;
-    
+  // Strategy 2: ### Task N: or ### N. title (English)
+  if (blocks.length === 0) {
+    headerRegex = /###\s*(?:Task\s*)?(\d+)[.:)]\s*(.+)/gi;
+    matches = [...text.matchAll(headerRegex)];
+    for (const m of matches) {
+      const headerPos = text.indexOf(m[0]);
+      const after = text.slice(headerPos + m[0].length);
+      const next = after.search(/\n###\s|\n##\s|\n---/);
+      blocks.push({ title: m[2].trim(), block: next >= 0 ? after.slice(0, next) : after });
+    }
+  }
+  
+  // Strategy 3: **任务 N**: or **Task N**: (bold markdown)
+  if (blocks.length === 0) {
+    headerRegex = /\*\*(?:Task\s*|任务\s*)?(\d+)\*\*[：:]\s*(.+)/gi;
+    matches = [...text.matchAll(headerRegex)];
+    for (const m of matches) {
+      const headerPos = text.indexOf(m[0]);
+      const after = text.slice(headerPos + m[0].length);
+      const next = after.search(/\n\*\*(?:Task|任务)|\n##|\n---/);
+      blocks.push({ title: m[2].trim(), block: next >= 0 ? after.slice(0, next) : after });
+    }
+  }
+  
+  // Strategy 4: Numbered list with **Title** (e.g., 1. **Feature X**)
+  if (blocks.length === 0) {
+    headerRegex = /^\d+[.)]\s*\*\*(.+?)\*\*/gm;
+    matches = [...text.matchAll(headerRegex)];
+    for (const m of matches) {
+      const headerPos = text.indexOf(m[0]);
+      const after = text.slice(headerPos + m[0].length);
+      const next = after.search(/\n\d+[.)]\s*\*\*|\n##|\n---/);
+      blocks.push({ title: m[1].trim(), block: next >= 0 ? after.slice(0, next) : after });
+    }
+  }
+
+  // Build tasks from extracted blocks
+  for (const { title, block } of blocks) {
     tasks.push({
       title,
-      description: extractField(block, "描述") || title,
-      goal: extractField(block, "目标") || "",
-      scope: extractField(block, "范围") || extractField(block, "改动范围") || "",
-      implementationPlan: extractField(block, "实现步骤") || extractField(block, "步骤") || "",
-      relatedFiles: extractField(block, "相关文件") || extractField(block, "涉及文件") || "",
-      acceptanceCriteria: extractField(block, "验收标准") || extractField(block, "验收条件") || "",
+      description: extractField(block, "描述") || extractField(block, "description") || extractField(block, "说明") || title,
+      goal: extractField(block, "目标") || extractField(block, "goal") || "",
+      scope: extractField(block, "范围") || extractField(block, "scope") || extractField(block, "改动范围") || "",
+      implementationPlan: extractField(block, "实现步骤") || extractField(block, "步骤") || extractField(block, "steps") || "",
+      relatedFiles: extractField(block, "相关文件") || extractField(block, "files") || extractField(block, "涉及文件") || "",
+      acceptanceCriteria: extractField(block, "验收标准") || extractField(block, "acceptance") || extractField(block, "验收条件") || "",
       requiresCommit: extractYesNo(block, "需要commit") || extractYesNo(block, "commit"),
       requiresPush: extractYesNo(block, "需要push") || extractYesNo(block, "push"),
-      requiresDeployment: extractYesNo(block, "需要部署") || extractYesNo(block, "部署"),
+      requiresDeployment: extractYesNo(block, "需要部署") || extractYesNo(block, "deploy") || extractYesNo(block, "部署"),
       codexPrompt: ""
     });
   }
 
   return tasks;
-}
-function extractField(block: string, field: string): string {
+}function extractField(block: string, field: string): string {
   const patterns = [
     new RegExp(`-\\s*${field}[：:]\\s*(.+)`, "i"),
     new RegExp(`${field}[：:]\\s*(.+)`, "i"),

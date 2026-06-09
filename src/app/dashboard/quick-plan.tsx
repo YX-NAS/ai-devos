@@ -213,6 +213,11 @@ export function QuickPlan() {
                       <p className="text-sm font-medium text-zinc-700">Step 2: Paste ChatGPT response here</p>
                       <p className="mt-1 text-xs text-zinc-400">将 ChatGPT 的完整回复粘贴到下方文本框。</p>
                     </div>
+                    <div className="mb-2 rounded-md bg-blue-50 p-2 text-xs text-blue-700">
+                      <p className="font-medium">如果解析失败，请确保 ChatGPT 输出使用以下格式之一：</p>
+                      <p className="mt-1"><code>### 任务 1: 标题</code> 或 <code>### Task 1: Title</code> 或 <code>**任务 1**: 标题</code></p>
+                      <p>每个任务下包含 <code>- 描述:</code> <code>- 目标:</code> <code>- 范围:</code> <code>- 实现步骤:</code> 等字段</p>
+                    </div>
                     <textarea
                       rows={12}
                       value={chatgptResponse}
