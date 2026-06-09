@@ -114,3 +114,21 @@ export async function POST(request: Request) {
     rawOutput: result.stdout
   });
 }
+
+async function bindDefaultAgents(projectId: string) {
+  const defaultConfigs = await db.agentConfig.findMany({
+    where: { isDefault: true }
+  });
+  
+  for (const config of defaultConfigs) {
+    const purpose = config.role === "GPT" ? "PLANNING" : "EXECUTION";
+    const existing = await db.projectAgentBinding.findFirst({
+      where: { projectId, configId: config.id }
+    });
+    if (!existing) {
+      await db.projectAgentBinding.create({
+        data: { projectId, configId: config.id, purpose }
+      });
+    }
+  }
+}

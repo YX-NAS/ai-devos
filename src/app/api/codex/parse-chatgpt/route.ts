@@ -45,6 +45,8 @@ export async function POST(request: Request) {
     }
   });
 
+  await bindDefaultAgents(project.id);
+
   const createdTasks = [];
   for (const taskPlan of plan.tasks) {
     const task = await prisma.task.create({
@@ -75,4 +77,22 @@ export async function POST(request: Request) {
     tasks: createdTasks,
     plan
   });
+}
+
+async function bindDefaultAgents(projectId: string) {
+  const defaultConfigs = await db.agentConfig.findMany({
+    where: { isDefault: true }
+  });
+  
+  for (const config of defaultConfigs) {
+    const purpose = config.role === "GPT" ? "PLANNING" : "EXECUTION";
+    const existing = await db.projectAgentBinding.findFirst({
+      where: { projectId, configId: config.id }
+    });
+    if (!existing) {
+      await db.projectAgentBinding.create({
+        data: { projectId, configId: config.id, purpose }
+      });
+    }
+  }
 }
