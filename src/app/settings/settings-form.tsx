@@ -84,6 +84,7 @@ export function CreateProfileForm() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [authMode, setAuthMode] = useState<string>("ACCOUNT_LOGIN");
+  const [provider, setProvider] = useState<string>("CHATGPT");
 
   async function onSubmit(formData: FormData) {
     setIsSaving(true);
@@ -146,7 +147,13 @@ export function CreateProfileForm() {
         </label>
         <label className="space-y-1 text-sm font-medium text-zinc-700">
           Provider
-          <select name="provider" required defaultValue="CHATGPT" className="h-9 w-full rounded-md border border-zinc-300 px-2.5 text-sm">
+          <select
+            name="provider"
+            required
+            value={provider}
+            onChange={(event) => setProvider(event.target.value)}
+            className="h-9 w-full rounded-md border border-zinc-300 px-2.5 text-sm"
+          >
             {AGENT_PROVIDER_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
@@ -166,7 +173,7 @@ export function CreateProfileForm() {
         </label>
       </div>
       <div className="mt-3">
-        <AuthModeSelector name="authMode" value={authMode} onChange={setAuthMode} provider="CHATGPT" />
+        <AuthModeSelector name="authMode" value={authMode} onChange={setAuthMode} provider={provider} />
       </div>
       {authMode === "API_KEY" ? (
         <div className="mt-3 space-y-2">
@@ -204,6 +211,7 @@ export function EditProfileButton({ config }: { config: AgentConfig }) {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [authMode, setAuthMode] = useState<string>(config.authMode ?? "ACCOUNT_LOGIN");
+  const [provider, setProvider] = useState<string>(config.provider);
 
   async function onSubmit(formData: FormData) {
     setIsSaving(true);
@@ -243,6 +251,7 @@ export function EditProfileButton({ config }: { config: AgentConfig }) {
         type="button"
         onClick={() => {
           setAuthMode(config.authMode ?? "ACCOUNT_LOGIN");
+          setProvider(config.provider);
           setIsOpen(true);
         }}
         className="inline-flex h-7 items-center gap-1 rounded-md border border-zinc-200 px-2 text-xs text-zinc-500 hover:bg-zinc-50 hover:text-zinc-700"
@@ -268,7 +277,13 @@ export function EditProfileButton({ config }: { config: AgentConfig }) {
                 </label>
                 <label className="space-y-1 text-sm font-medium text-zinc-700">
                   Provider
-                  <select name="provider" required defaultValue={config.provider} className="h-9 w-full rounded-md border border-zinc-300 px-2.5 text-sm">
+                  <select
+                    name="provider"
+                    required
+                    value={provider}
+                    onChange={(event) => setProvider(event.target.value)}
+                    className="h-9 w-full rounded-md border border-zinc-300 px-2.5 text-sm"
+                  >
                     {AGENT_PROVIDER_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
                     ))}
@@ -287,8 +302,7 @@ export function EditProfileButton({ config }: { config: AgentConfig }) {
                   <input name="model" defaultValue={config.model ?? ""} className="h-9 w-full rounded-md border border-zinc-300 px-2.5 text-sm" />
                 </label>
               </div>
-              <AuthModeSelector name="authMode" value={authMode} onChange={setAuthMode} provider="CHATGPT" />
-              <AuthModeSelector name="authMode" value={authMode} onChange={setAuthMode} provider={config.provider} />
+              <AuthModeSelector name="authMode" value={authMode} onChange={setAuthMode} provider={provider} />
               {authMode === "API_KEY" ? (
                 <div className="space-y-2">
                   <label className="block space-y-1 text-sm font-medium text-zinc-700">

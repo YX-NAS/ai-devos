@@ -119,6 +119,22 @@ TODO → RESEARCH → DESIGN → READY_FOR_CODEX → IN_PROGRESS → REVIEW → 
 
 路径：`/settings`
 
+### 授权状态 / Authorization Status
+
+Settings 顶部会显示 **Authorization Status**：
+
+- **Codex Runtime**：检查运行 AI DevOS 的主机是否能找到 Codex CLI。
+- **API Key Profile**：检查 `apiKeyRef` 对应的服务器环境变量是否存在。
+- **账号登录 Profile**：ChatGPT 使用浏览器账号登录；Codex 需要运行环境中已安装并登录 Codex CLI。
+
+如果 Codex Runtime 显示 `Needs setup`，自动执行无法闭环。请在服务器环境中配置：
+
+```env
+CODEX_BIN=/path/to/codex
+```
+
+或改用任务详情页中的 **Copy Prompt**，在 Codex Desktop 中手动执行后，再把结果保存回任务。
+
 ### 创建 Agent Profile
 1. 在 **ChatGPT Profiles** 或 **Codex Profiles** 区域点击 **Add Profile**
 2. 填写：
@@ -188,6 +204,8 @@ TODO → RESEARCH → DESIGN → READY_FOR_CODEX → IN_PROGRESS → REVIEW → 
 2. 在 **Codex Prompt** 区域点击 **Copy Prompt**
 3. 打开 Codex 对话窗口，粘贴 Prompt
 4. Codex 执行完毕后，回到任务详情页
+
+如果要使用 **Execute with Codex** 自动执行，必须确保 Settings 中的 **Codex Runtime** 为 `Ready`。否则系统会提示配置 `CODEX_BIN`，并将执行失败原因记录到任务中。
 
 ### 第4步：记录结果和验收
 

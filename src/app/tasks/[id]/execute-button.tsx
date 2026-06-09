@@ -15,6 +15,14 @@ export function ExecuteWithCodexButton({
   const [isExecuting, setIsExecuting] = useState(false);
 
   async function handleExecute() {
+    const statusResponse = await fetch("/api/codex/status");
+    const status = await statusResponse.json();
+
+    if (!status.available) {
+      alert(`Codex runtime is not ready: ${status.message}\n\nConfigure CODEX_BIN on the server, or use Copy Prompt and execute in Codex Desktop manually.`);
+      return;
+    }
+
     if (!confirm("Codex will execute this task. This may take several minutes. Continue?")) {
       return;
     }

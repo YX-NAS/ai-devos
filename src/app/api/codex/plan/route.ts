@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { execCodex } from "@/features/codex-exec/codex-exec-service";
+import { execCodex, getCodexRuntimeStatus } from "@/features/codex-exec/codex-exec-service";
 import { generatePlanningPrompt } from "@/features/codex-exec/planning-prompt";
 import { parsePlanningOutput } from "@/features/codex-exec/planning-parser";
 import { prisma } from "@/lib/prisma";
@@ -18,6 +18,14 @@ export async function POST(request: Request) {
   const { goal, scope, projectId, mode } = planRequestSchema.parse(body);
 
   // Step 1: Generate planning prompt and call Codex
+  const runtime = getCodexRuntimeStatus();
+  if (!runtime.available) {
+    return NextResponse.json(
+      { error: runtime.message, runtime },
+      { status: 503 }
+    );
+  }
+
   const prompt = generatePlanningPrompt(goal, scope);
   const result = await execCodex(prompt, { timeoutMs: 300000 }); // 5 min timeout
 
@@ -80,6 +88,8 @@ export async function POST(request: Request) {
       }
     });
   }
+
+  await bindDefaultAgents(project.id);
 
   // Step 5: Create tasks
   const createdTasks = [];

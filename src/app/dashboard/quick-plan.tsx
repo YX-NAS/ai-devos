@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Sparkles, Loader2, Copy, Check } from "lucide-react";
 import { generatePlanningPrompt } from "@/features/codex-exec/planning-prompt";
-import { PromptTemplates, PROMPT_TEMPLATES, type PromptTemplate } from "./prompt-templates";
+import { PromptTemplates, type PromptTemplate } from "./prompt-templates";
 
 type FlowMode = "codex" | "chatgpt";
 

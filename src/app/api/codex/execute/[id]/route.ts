@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { execCodex } from "@/features/codex-exec/codex-exec-service";
+import { execCodex, getCodexRuntimeStatus } from "@/features/codex-exec/codex-exec-service";
 import { prisma } from "@/lib/prisma";
 import { ensureDatabase } from "@/lib/bootstrap-db";
 
@@ -24,6 +24,24 @@ export async function POST(request: Request, context: RouteContext) {
     return NextResponse.json({ error: "Task has no Codex prompt" }, { status: 400 });
   }
 
+  const runtime = getCodexRuntimeStatus();
+
+  if (!runtime.available) {
+    const updatedTask = await prisma.task.update({
+      where: { id },
+      data: {
+        executionResult: `Codex execution blocked: ${runtime.message}`,
+        status: "BLOCKED"
+      }
+    });
+
+    return NextResponse.json({
+      error: runtime.message,
+      task: updatedTask,
+      runtime
+    }, { status: 503 });
+  }
+
   // Execute with Codex
   const result = await execCodex(task.codexPrompt, {
     timeoutMs: 900000, // 15 min
@@ -31,10 +49,38 @@ export async function POST(request: Request, context: RouteContext) {
   });
 
   if (result.timedOut) {
+    await prisma.task.update({
+      where: { id },
+      data: {
+        executionResult: `Codex execution timed out.\n\n${result.stdout.slice(-5000)}`,
+        status: "BLOCKED"
+      }
+    });
+
     return NextResponse.json({
       error: "Execution timed out",
       partialOutput: result.stdout.slice(-500)
     }, { status: 504 });
+  }
+
+  if (result.exitCode !== 0) {
+    const updatedTask = await prisma.task.update({
+      where: { id },
+      data: {
+        executionResult: [
+          "Codex execution failed.",
+          result.stdout ? `STDOUT:\n${result.stdout.slice(-4000)}` : "",
+          result.stderr ? `STDERR:\n${result.stderr.slice(-2000)}` : ""
+        ].filter(Boolean).join("\n\n"),
+        status: "BLOCKED"
+      }
+    });
+
+    return NextResponse.json({
+      error: result.stderr || "Codex execution failed",
+      task: updatedTask,
+      exitCode: result.exitCode
+    }, { status: 500 });
   }
 
   // Save execution result
