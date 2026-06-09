@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Sparkles, Loader2, Copy, Check } from "lucide-react";
 import { generatePlanningPrompt } from "@/features/codex-exec/planning-prompt";
+import { PromptTemplates, PROMPT_TEMPLATES, type PromptTemplate } from "./prompt-templates";
 
 type FlowMode = "codex" | "chatgpt";
 
@@ -21,6 +22,16 @@ export function QuickPlan() {
   const [step, setStep] = useState<"input" | "prompt" | "paste">("input");
   const [chatgptPrompt, setChatgptPrompt] = useState("");
   const [chatgptResponse, setChatgptResponse] = useState("");
+
+  function handleTemplateSelect(template: PromptTemplate) {
+    if (template.id !== "custom") {
+      setGoal(template.goal);
+      setScope(template.scope);
+    } else {
+      setGoal("");
+      setScope("");
+    }
+  }
 
   // Generate ChatGPT planning prompt
   function handleGeneratePrompt() {
@@ -162,6 +173,7 @@ export function QuickPlan() {
               <div className="space-y-4">
                 {step === "input" && (
                   <>
+                    <PromptTemplates onSelect={handleTemplateSelect} />
                     <label className="block space-y-1.5 text-sm font-medium text-zinc-700">
                       目标 / Goal
                       <textarea rows={3} value={goal} onChange={(e) => setGoal(e.target.value)} placeholder="例如：为 AI DevOS 添加用户反馈功能" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm" />
