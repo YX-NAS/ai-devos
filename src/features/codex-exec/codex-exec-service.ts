@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { exec } from "node:child_process";
 
 const CODEX_BIN = "/Applications/Codex.app/Contents/Resources/codex";
 const DEFAULT_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
@@ -18,63 +18,40 @@ export async function execCodex(
     workdir?: string;
   }
 ): Promise<CodexExecResult> {
-  const args = ["exec"];
-  if (options?.config) {
-    for (const [key, value] of Object.entries(options.config)) {
-      args.push("-c", `${key}=${value}`);
-    }
-  }
-  args.push("-");
-
-  const child = spawn(CODEX_BIN, args, {
-    cwd: options?.workdir ?? process.cwd(),
-    stdio: ["pipe", "pipe", "pipe"],
-    timeout: options?.timeoutMs ?? DEFAULT_TIMEOUT_MS,
-    env: { ...process.env, ...(options?.config ?? {}) }
-  });
-
-  let stdout = "";
-  let stderr = "";
-
-  child.stdout.on("data", (data: Buffer) => {
-    stdout += data.toString();
-  });
-
-  child.stderr.on("data", (data: Buffer) => {
-    stderr += data.toString();
-  });
-
-  child.stdin.write(prompt);
-  child.stdin.end();
-
   return new Promise((resolve) => {
+    const timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     let resolved = false;
+
     const timer = setTimeout(() => {
       if (!resolved) {
         resolved = true;
-        child.kill();
-        resolve({ stdout, stderr, exitCode: null, timedOut: true });
+        resolve({ stdout: "", stderr: "timeout", exitCode: null, timedOut: true });
       }
-    }, options?.timeoutMs ?? DEFAULT_TIMEOUT_MS);
+    }, timeoutMs);
 
-    child.on("close", (code) => {
+    // Write prompt to stdin via heredoc-style echo pipe
+    const escapedPrompt = prompt.replace(/\\/g, "\\\\").replace(/'/g, "'\\''");
+    const cmd = `echo '${escapedPrompt}' | ${CODEX_BIN} exec -`;
+
+    exec(cmd, {
+      cwd: options?.workdir ?? process.cwd(),
+      timeout: timeoutMs,
+      maxBuffer: 10 * 1024 * 1024, // 10 MB
+      env: { ...process.env, ...(options?.config ?? {}) }
+    }, (error, stdout, stderr) => {
       if (!resolved) {
         resolved = true;
         clearTimeout(timer);
-        resolve({ stdout, stderr, exitCode: code, timedOut: false });
-      }
-    });
-
-    child.on("error", (err) => {
-      if (!resolved) {
-        resolved = true;
-        clearTimeout(timer);
-        resolve({ stdout: "", stderr: err.message, exitCode: -1, timedOut: false });
+        resolve({
+          stdout: stdout || "",
+          stderr: stderr || "",
+          exitCode: error ? (error as NodeJS.ErrnoException).code || -1 : 0,
+          timedOut: false
+        });
       }
     });
   });
 }
-
 export function generatePlanningPrompt(goal: string, scope?: string): string {
   return [
     "你是一个 AI DevOS 规划助手。请对以下目标进行任务分解。",
