@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { PageTitle } from "@/components/common/page-title";
 import { EmptyState } from "@/components/common/empty-state";
 import { StatusBadge } from "@/components/common/status-badge";
+import { ProjectActions } from "./project-actions";
 import { getProject } from "@/features/projects/project-service";
 import { projectCategoryLabels, projectStageLabels, taskStatusLabels } from "@/lib/constants";
 
@@ -25,9 +26,14 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
         title={project.name}
         description={`${project.repoName ?? "No repo"} · ${projectCategoryLabels[project.category]}`}
       />
-      <div className="flex flex-wrap gap-2">
-        <StatusBadge value={project.priority} />
-        <StatusBadge value={project.stage} label={projectStageLabels[project.stage]} />
+      
+
+      <div className="flex items-center justify-between">
+        <div className="flex flex-wrap gap-2">
+          <StatusBadge value={project.priority} />
+          <StatusBadge value={project.stage} label={projectStageLabels[project.stage]} />
+        </div>
+        <ProjectActions project={project} />
       </div>
 
       <section className="grid gap-4 lg:grid-cols-3">
