@@ -59,7 +59,7 @@ function AuthModeSelector({
       {isAccountLogin && provider === "CHATGPT" && (
         <div className="mt-2 rounded-md bg-blue-50 p-2 text-xs text-blue-700">
           <p className="font-medium">账号登录说明：</p>
-          <p className="mt-1">ChatGPT 通过浏览器登录，无需在此配置。使用 Quick Plan 时点击 "Generate Prompt" 生成任务描述，然后 <a href="https://chatgpt.com" target="_blank" className="underline">打开 ChatGPT</a> 粘贴即可。</p>
+          <p className="mt-1">ChatGPT 通过浏览器登录，无需在此配置。使用 Quick Plan 时点击 &quot;Generate Prompt&quot; 生成任务描述，然后 <a href="https://chatgpt.com" target="_blank" className="underline">打开 ChatGPT</a> 粘贴即可。</p>
         </div>
       )}
       {isAccountLogin && provider === "CODEX" && (
