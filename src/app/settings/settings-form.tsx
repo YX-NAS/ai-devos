@@ -25,33 +25,56 @@ const AUTH_MODE_OPTIONS = [
 function AuthModeSelector({
   value,
   name,
-  onChange
+  onChange,
+  provider
 }: {
   value: string;
   name: string;
   onChange: (val: string) => void;
+  provider: string;
 }) {
+  const isAccountLogin = value === "ACCOUNT_LOGIN";
   return (
-    <label className="block space-y-1.5 text-sm font-medium text-zinc-700">
-      授权模式
-      <div className="mt-1.5 flex gap-1 rounded-md border border-zinc-300 bg-zinc-100 p-0.5">
-        {AUTH_MODE_OPTIONS.map((opt) => (
-          <button
-            key={opt.value}
-            type="button"
-            onClick={() => onChange(opt.value)}
-            className={`flex-1 rounded-sm px-3 py-1.5 text-xs font-medium transition-colors ${
-              value === opt.value
-                ? "bg-white text-zinc-950 shadow-sm"
-                : "text-zinc-500 hover:text-zinc-700"
-            }`}
-          >
-            {opt.label}
-          </button>
-        ))}
-      </div>
-      <input type="hidden" name={name} value={value} />
-    </label>
+    <div>
+      <label className="block space-y-1.5 text-sm font-medium text-zinc-700">
+        授权模式
+        <div className="mt-1.5 flex gap-1 rounded-md border border-zinc-300 bg-zinc-100 p-0.5">
+          {AUTH_MODE_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => onChange(opt.value)}
+              className={`flex-1 rounded-sm px-3 py-1.5 text-xs font-medium transition-colors ${
+                value === opt.value
+                  ? "bg-white text-zinc-950 shadow-sm"
+                  : "text-zinc-500 hover:text-zinc-700"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        <input type="hidden" name={name} value={value} />
+      </label>
+      {isAccountLogin && provider === "CHATGPT" && (
+        <div className="mt-2 rounded-md bg-blue-50 p-2 text-xs text-blue-700">
+          <p className="font-medium">账号登录说明：</p>
+          <p className="mt-1">ChatGPT 通过浏览器登录，无需在此配置。使用 Quick Plan 时点击 "Generate Prompt" 生成任务描述，然后 <a href="https://chatgpt.com" target="_blank" className="underline">打开 ChatGPT</a> 粘贴即可。</p>
+        </div>
+      )}
+      {isAccountLogin && provider === "CODEX" && (
+        <div className="mt-2 rounded-md bg-emerald-50 p-2 text-xs text-emerald-700">
+          <p className="font-medium">账号登录说明：</p>
+          <p className="mt-1">Codex 使用桌面应用或 CLI 登录，无需在此配置。登录状态由 Codex Desktop 管理，AI DevOS 通过本地 CLI 调用 Codex。</p>
+        </div>
+      )}
+      {!isAccountLogin && (
+        <div className="mt-2 rounded-md bg-amber-50 p-2 text-xs text-amber-700">
+          <p className="font-medium">API Key 说明：</p>
+          <p className="mt-1">在下方填入 API Key 的引用名（非实际 Key 值）。真实 Key 通过服务器 .env 文件注入，不保存在数据库中。</p>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -143,7 +166,7 @@ export function CreateProfileForm() {
         </label>
       </div>
       <div className="mt-3">
-        <AuthModeSelector name="authMode" value={authMode} onChange={setAuthMode} />
+        <AuthModeSelector name="authMode" value={authMode} onChange={setAuthMode} provider="CHATGPT" />
       </div>
       {authMode === "API_KEY" ? (
         <label className="mt-3 block space-y-1 text-sm font-medium text-zinc-700">
@@ -261,7 +284,8 @@ export function EditProfileButton({ config }: { config: AgentConfig }) {
                   <input name="model" defaultValue={config.model ?? ""} className="h-9 w-full rounded-md border border-zinc-300 px-2.5 text-sm" />
                 </label>
               </div>
-              <AuthModeSelector name="authMode" value={authMode} onChange={setAuthMode} />
+              <AuthModeSelector name="authMode" value={authMode} onChange={setAuthMode} provider="CHATGPT" />
+              <AuthModeSelector name="authMode" value={authMode} onChange={setAuthMode} provider={config.provider} />
               {authMode === "API_KEY" ? (
                 <label className="block space-y-1 text-sm font-medium text-zinc-700">
                   API Key Ref
