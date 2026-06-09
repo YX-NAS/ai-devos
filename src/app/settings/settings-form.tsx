@@ -169,10 +169,13 @@ export function CreateProfileForm() {
         <AuthModeSelector name="authMode" value={authMode} onChange={setAuthMode} provider="CHATGPT" />
       </div>
       {authMode === "API_KEY" ? (
-        <label className="mt-3 block space-y-1 text-sm font-medium text-zinc-700">
-          API Key Reference
-          <input name="apiKeyRef" placeholder="OPENAI_API_KEY (not the value)" className="h-9 w-full rounded-md border border-zinc-300 px-2.5 text-sm" />
-        </label>
+        <div className="mt-3 space-y-2">
+          <label className="block space-y-1 text-sm font-medium text-zinc-700">
+            API Key Reference
+            <input name="apiKeyRef" placeholder="OPENAI_API_KEY (填写引用名，不要填真实Key)" className="h-9 w-full rounded-md border border-zinc-300 px-2.5 text-sm" />
+          </label>
+          <p className="text-xs text-red-600">⚠ 不要在此填入真实 API Key！只填引用名（如 OPENAI_API_KEY），真实 Key 通过服务器 .env 注入。</p>
+        </div>
       ) : null}
       <label className="mt-3 block space-y-1 text-sm font-medium text-zinc-700">
         Strategy
@@ -287,10 +290,13 @@ export function EditProfileButton({ config }: { config: AgentConfig }) {
               <AuthModeSelector name="authMode" value={authMode} onChange={setAuthMode} provider="CHATGPT" />
               <AuthModeSelector name="authMode" value={authMode} onChange={setAuthMode} provider={config.provider} />
               {authMode === "API_KEY" ? (
-                <label className="block space-y-1 text-sm font-medium text-zinc-700">
-                  API Key Ref
-                  <input name="apiKeyRef" defaultValue={config.apiKeyRef ?? ""} className="h-9 w-full rounded-md border border-zinc-300 px-2.5 text-sm" />
-                </label>
+                <div className="space-y-2">
+                  <label className="block space-y-1 text-sm font-medium text-zinc-700">
+                    API Key Ref
+                    <input name="apiKeyRef" defaultValue={config.apiKeyRef ?? ""} className="h-9 w-full rounded-md border border-zinc-300 px-2.5 text-sm" />
+                  </label>
+                  <p className="text-xs text-red-600">⚠ 不要在此填入真实 API Key！</p>
+                </div>
               ) : null}
               <label className="block space-y-1 text-sm font-medium text-zinc-700">
                 Strategy

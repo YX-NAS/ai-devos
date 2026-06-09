@@ -1,8 +1,19 @@
 import { NextResponse } from "next/server";
-import { createHash } from "node:crypto";
+import { timingSafeEqual, createHash } from "node:crypto";
 
 const COOKIE_NAME = "ai-devos-session";
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 7; // 7 days
+
+function safeCompare(a: string, b: string): boolean {
+  try {
+    const bufA = Buffer.from(a, "utf-8");
+    const bufB = Buffer.from(b, "utf-8");
+    if (bufA.length !== bufB.length) return false;
+    return timingSafeEqual(bufA, bufB);
+  } catch {
+    return false;
+  }
+}
 
 export async function POST(request: Request) {
   const { password } = await request.json();
@@ -15,7 +26,7 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!password || password !== adminPassword) {
+  if (!password || !safeCompare(password, adminPassword)) {
     return NextResponse.json(
       { error: "Invalid password" },
       { status: 401 }

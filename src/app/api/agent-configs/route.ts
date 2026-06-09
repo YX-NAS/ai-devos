@@ -5,8 +5,21 @@ import {
   listAgentConfigs
 } from "@/features/agent-configs/agent-config-service";
 
+
+function maskApiKeyRef(configs: Array<Record<string, unknown>>) {
+  return configs.map(config => ({
+    ...config,
+    apiKeyRef: config.apiKeyRef
+      ? config.apiKeyRef.length > 8
+        ? config.apiKeyRef.slice(0, 2) + "****" + config.apiKeyRef.slice(-2)
+        : "****"
+      : null
+  }));
+}
+
 export async function GET() {
-  return NextResponse.json(await listAgentConfigs());
+  const configs = await listAgentConfigs();
+  return NextResponse.json(maskApiKeyRef(configs));
 }
 
 export async function POST(request: Request) {
