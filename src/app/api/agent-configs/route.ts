@@ -6,7 +6,7 @@ import {
 } from "@/features/agent-configs/agent-config-service";
 
 
-function maskApiKeyRef(configs: Array<Record<string, unknown>>) {
+function maskApiKeyRef(configs: Array<{ apiKeyRef?: string | null; [key: string]: unknown }>) {
   return configs.map(config => ({
     ...config,
     apiKeyRef: config.apiKeyRef
