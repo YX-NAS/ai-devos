@@ -33,12 +33,12 @@ export async function execCodex(
       env: { ...process.env, ...(options?.config ?? {}) }
     });
     return { stdout: stdout || "", stderr: "", exitCode: 0, timedOut: false };
-  } catch (err: any) {
+  } catch (err: unknown) {
     return {
-      stdout: err.stdout || "",
-      stderr: err.stderr || err.message || "",
-      exitCode: err.status || -1,
-      timedOut: err.killed || false
+      stdout: (err as { stdout?: string }).stdout || "",
+      stderr: (err as { stderr?: string; message?: string }).stderr || (err as { message?: string }).message || "",
+      exitCode: (err as { status?: number }).status || -1,
+      timedOut: !!(err as { killed?: boolean }).killed
     };
   }
 }
