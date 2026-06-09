@@ -1,92 +1,166 @@
 # AI DevOS
 
-AI DevOS is a GPT-planned and Codex-executed development operating system for managing AI projects, requirements, technical design, Codex prompts, task execution, and review workflows.
+> ChatGPT 规划 + Codex 执行的 AI 开发总控台  
+> Production: `https://codex.5176nas.site`
+
+AI DevOS is a development operating system that orchestrates ChatGPT for planning and Codex for execution. It auto-decomposes goals into executable tasks, tracks progress on a drag-and-drop Kanban board, records deployment history, and secures the entire workflow behind admin authentication.
 
 ## Tech Stack
 
-- Next.js 15 App Router
-- TypeScript
-- TailwindCSS
-- Prisma Client
-- SQLite
+| Layer | Tech |
+|---|---|
+| Framework | Next.js 15 App Router |
+| Language | TypeScript |
+| Styling | Tailwind CSS 4 |
+| Database | Prisma + SQLite |
+| Charts | Recharts |
+| Drag & Drop | dnd-kit |
+| Deployment | Docker + Nginx |
 
-## Getting Started
+## Quick Start
 
 ```bash
 npm install
 cp .env.example .env
+echo "AI_DEVOS_ADMIN_PASSWORD=your-password" >> .env
 npm run prisma:generate
 npm run db:push
 npm run db:seed
 npm run dev
 ```
 
-Open [http://127.0.0.1:3000](http://127.0.0.1:3000).
+Open [http://localhost:3000](http://localhost:3000), log in with your admin password.
 
-## Usage
+## Core Features
 
-AI DevOS is organized around a simple operating flow:
+### ChatGPT → Codex Automated Pipeline
+1. Input a goal on the Dashboard Quick Plan
+2. Generate a structured planning prompt
+3. Copy → paste to ChatGPT → get response back
+4. Paste ChatGPT response → AI DevOS auto-parses into tasks
+5. Each task pre-loaded with Codex execution prompt
+6. One-click "Execute with Codex" on any task (Mac with Codex CLI)
+
+### Drag-and-Drop Kanban Board
+8-column task board (TODO → RESEARCH → DESIGN → READY_FOR_CODEX → IN_PROGRESS → REVIEW → DONE → BLOCKED). Drag cards between columns to update status instantly.
+
+### Dashboard Charts
+Bar chart (tasks by status) + donut chart (status distribution) powered by Recharts.
+
+### Project Management
+- Create, edit, and delete projects
+- Auto-bind default ChatGPT/Codex agent configs
+- Track requirements, designs, tasks, reviews per project
+- Deployment records with environment, version, commit SHA
+
+### Settings & Security
+- Agent profile management (ChatGPT / Codex / OpenAI API / Local)
+- Auth mode: API Key or Account Login
+- Security headers (CSP, X-Frame-Options, X-Content-Type-Options)
+- Login rate limiting (5 attempts/minute)
+- Timing-safe password comparison
+- apiKeyRef masking in API responses
+
+### Prompt Templates
+6 preset templates (Feature, Bug Fix, Refactor, Docs, Performance, Custom) — one-click fill goal and scope fields.
+
+## Usage Flow
 
 ```text
-Project -> Requirement -> Design -> Task -> Codex Prompt -> Review -> Done
+Dashboard Quick Plan → Generate Prompt → ChatGPT Plans → Parse Response
+    → Auto-create Tasks → Kanban Board → Execute with Codex → Record Results
 ```
 
-Use the Dashboard to understand global status, Projects to manage each AI project, Tasks to hand executable work to Codex, Prompts to save reusable GPT/Codex instructions, and Reviews to record acceptance results.
-
-For a detailed bilingual step-by-step guide, including tool configuration, GPT planning, Codex execution, Vercel deployment notes, API examples, validation commands, and troubleshooting, see [docs/USER_GUIDE.md](docs/USER_GUIDE.md).
-
-## Versions
-
-- `1.0.0`: packaged MVP release. See [docs/10_RELEASE_1_0.md](docs/10_RELEASE_1_0.md).
-- `1.1.0`: ChatGPT/Codex configuration binding, Codex task templates, generated execution prompts, and desktop app scaffold. See [docs/14_RELEASE_1_1.md](docs/14_RELEASE_1_1.md).
-- `1.2.0`: planned executable workflow hub with auth, secure profile management, task execution loop, deployment records, and desktop production preview. See [docs/15_PHASE_1_2_PLAN.md](docs/15_PHASE_1_2_PLAN.md).
+See [docs/17_USER_GUIDE_V2.md](docs/17_USER_GUIDE_V2.md) for the full bilingual step-by-step guide.
 
 ## Docker Deployment
-
-AI DevOS can run as a Docker container with persistent SQLite storage:
 
 ```bash
 docker compose up -d --build
 ```
 
-Default host port:
+Default host port: `3121`
 
-```text
-3121
+Persistence: SQLite database mounted at `./docker-data/ai-devos.db`
+
+### Deploy to Production
+
+```bash
+ssh root@your-server
+cd /srv/apps/ai-devos
+git pull origin codex/ai-devos-1.2
+AI_DEVOS_ADMIN_PASSWORD=your-password docker compose up -d --build
 ```
 
-For full deployment, Nginx, backup, update, and cleanup instructions, see [docs/13_DOCKER_DEPLOYMENT.md](docs/13_DOCKER_DEPLOYMENT.md).
+### Backup & Restore
 
-## Cloud Deployment
+```bash
+# Backup
+cp docker-data/ai-devos.db docker-data/ai-devos.db.$(date +%Y%m%d-%H%M).bak
 
-The Vercel deployment is suitable for MVP demos and workflow validation. The current cloud setup uses a temporary SQLite database path and auto-seeds demo data when needed. For long-term production use, replace SQLite with a persistent database such as Vercel Postgres, Neon, Supabase, or Turso.
+# Restore
+docker compose down
+cp docker-data/ai-devos.db.BACKUP docker-data/ai-devos.db
+docker compose up -d
+```
 
 ## Scripts
 
 ```bash
-npm run dev
-npm run verify
-npm run db:push
-npm run db:seed
-npm run desktop:dev
+npm run dev          # Start dev server
+npm run verify       # Lint + production build (runs before every git push)
+npm run db:push      # Initialize SQLite schema
+npm run db:seed      # Seed demo data
+npm run docker:up    # Docker Compose up with build
+npm run docker:logs  # Follow Docker logs
 ```
 
-`npm run verify` runs lint and production build.
+## Versions
 
-`npm run desktop:dev` starts the Tauri desktop development shell.
+| Version | Highlights |
+|---|---|
+| `v1.0.0` | MVP: Project/Task/Prompt management, REST APIs |
+| `v1.1.0` | ChatGPT/Codex binding, task templates, Codex prompt generator |
+| `v1.2.0` | Auth gate, task detail/edit, copy prompt, deployment records, settings UI |
+| `v1.3.0` | Auto-pipeline (ChatGPT+Codex), Kanban board, Dashboard charts, prompt templates, security hardening |
 
-## MVP Scope
+## API Reference
 
-- Dashboard with project/task status summary
-- Project list, detail, and create page
-- Task board across all projects
-- Prompt center
-- Agent responsibility center
-- Workflow timeline
-- Settings placeholder
-- REST APIs for projects, requirements, designs, tasks, prompts, reviews, and workflow events
-- Seed data for AI DevOS and sample related work
+All endpoints protected by session cookie auth.
+
+| Method | Path | Description |
+|---|---|---|
+| POST | `/api/auth/login` | Login |
+| POST | `/api/auth/logout` | Logout |
+| GET | `/api/projects` | List projects |
+| PATCH | `/api/projects/[id]` | Update project |
+| DELETE | `/api/projects/[id]` | Delete project |
+| GET/POST | `/api/tasks` | List/Create tasks |
+| PATCH | `/api/tasks/[id]` | Update task |
+| PATCH | `/api/tasks/[id]/status` | Update task status |
+| POST | `/api/codex/plan` | Auto-plan with Codex |
+| POST | `/api/codex/parse-chatgpt` | Parse ChatGPT output → tasks |
+| POST | `/api/codex/execute/[id]` | Execute task with Codex |
+| GET | `/api/deployments` | List deployment records |
+| GET/POST/PATCH | `/api/agent-configs` | Agent config CRUD |
+
+## Architecture
+
+```
+┌─────────┐     ┌──────────┐     ┌───────┐
+│ ChatGPT │────▶│AI DevOS  │────▶│ Codex │
+│ (Plan)  │     │(Pipeline)│     │(Exec) │
+└─────────┘     └──────────┘     └───────┘
+                     │
+              ┌──────▼──────┐
+              │   SQLite    │
+              │ (Persistence)│
+              └─────────────┘
+```
 
 ## Notes
 
-This project includes `scripts/setup-sqlite.mjs` as a local SQLite schema initializer. It keeps setup deterministic in this workspace while preserving the Prisma schema as the source data model contract.
+- API keys are NEVER stored in the database — only reference names
+- `npm run verify` runs automatically before every `git push` via pre-push hook
+- The `codex exec` CLI integration works on macOS where Codex Desktop is installed
+- For the Singapore production server, the admin password is injected via environment variable

@@ -1,7 +1,8 @@
 # AI DevOS 操作手册 / User Guide v2
 
-> 适用版本：1.2+ (含 1.3 看板与图表)  
-> 线上地址：`https://codex.5176nas.site`
+> 适用版本：1.3.0  
+> 线上地址：`https://codex.5176nas.site`  
+> 最新发布：v1.3.0
 
 ## 1. 登录 / Login
 

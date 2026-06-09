@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ai-devos:1.2.0
+    image: ai-devos:1.3.0
     container_name: ai-devos
     restart: unless-stopped
     environment:
