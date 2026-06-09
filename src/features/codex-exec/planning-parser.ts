@@ -72,68 +72,37 @@ function extractSection(text: string, heading: string, fallback: string): string
 function extractTasks(text: string): ParsedTask[] {
   const tasks: ParsedTask[] = [];
   
-  // Try multiple task extraction strategies
-  const strategies = [
-    // Strategy 1: ### 任务 N: title
-    /###\s*任务\s*(\d+)[:：]\s*(.+?)(?=\n###\s*任务|\n##\s|\n---|$)/g,
-    // Strategy 2: ### N. Title or ### Task N: Title
-    /###\s*(?:Task\s*)?(\d+)[.:)]\s*(.+?)(?=\n###\s|\n##\s|\n---|$)/g,
-    // Strategy 3: Numbered items with **Task** pattern
-    /\*\*任务\s*(\d+)\*\*[：:]\s*(.+?)(?=\n\*\*任务|\n##|\n---|$)/gi,
-  ];
+  // Split text into task blocks using ### 任务 N: markers
+  const headerRegex = /###\s*任务\s*(\d+)[:：]\s*(.+)/g;
+  const headers = [...text.matchAll(headerRegex)];
   
-  let found = false;
-  for (const strategy of strategies) {
-    const matches = [...text.matchAll(strategy)];
-    if (matches.length > 0) {
-      for (const match of matches) {
-        const block = match[2] || "";
-        const titleMatch = block.match(/^(.+)/);
-        const title = titleMatch?.[1]?.trim() || `Task ${match[1]}`;
-
-        tasks.push({
-          title,
-          description: extractField(block, "描述") || title,
-          goal: extractField(block, "目标") || "",
-          scope: extractField(block, "范围") || extractField(block, "改动范围") || "",
-          implementationPlan: extractField(block, "实现步骤") || extractField(block, "步骤") || "",
-          relatedFiles: extractField(block, "相关文件") || extractField(block, "涉及文件") || "",
-          acceptanceCriteria: extractField(block, "验收标准") || extractField(block, "验收条件") || extractField(block, "完成标准") || "",
-          requiresCommit: extractYesNo(block, "需要commit") || extractYesNo(block, "commit"),
-          requiresPush: extractYesNo(block, "需要push") || extractYesNo(block, "push"),
-          requiresDeployment: extractYesNo(block, "需要部署") || extractYesNo(block, "部署"),
-          codexPrompt: ""
-        });
-      }
-      found = true;
-      break;
-    }
-  }
-  
-  // Fallback: If no tasks found, try to parse markdown headers as task titles
-  if (!found) {
-    const headerRegex = /^#{1,3}\s+(\d+)[.:)]?\s*(.+)$/gm;
-    const headers = [...text.matchAll(headerRegex)];
-    for (const h of headers.slice(0, 6)) {
-      tasks.push({
-        title: h[2].trim(),
-        description: h[2].trim(),
-        goal: "",
-        scope: "",
-        implementationPlan: "",
-        relatedFiles: "",
-        acceptanceCriteria: "",
-        requiresCommit: false,
-        requiresPush: false,
-        requiresDeployment: false,
-        codexPrompt: ""
-      });
-    }
+  for (const header of headers) {
+    const taskNum = header[1];
+    const title = (header[2] || '').trim();
+    
+    // Find the block for this task by locating from the header to next header or ## section
+    const headerPos = text.indexOf(header[0]);
+    const afterHeader = text.slice(headerPos + header[0].length);
+    const nextHeader = afterHeader.search(/\n###\s*任务|\n##\s|\n---/);
+    const block = nextHeader >= 0 ? afterHeader.slice(0, nextHeader) : afterHeader;
+    
+    tasks.push({
+      title,
+      description: extractField(block, "描述") || title,
+      goal: extractField(block, "目标") || "",
+      scope: extractField(block, "范围") || extractField(block, "改动范围") || "",
+      implementationPlan: extractField(block, "实现步骤") || extractField(block, "步骤") || "",
+      relatedFiles: extractField(block, "相关文件") || extractField(block, "涉及文件") || "",
+      acceptanceCriteria: extractField(block, "验收标准") || extractField(block, "验收条件") || "",
+      requiresCommit: extractYesNo(block, "需要commit") || extractYesNo(block, "commit"),
+      requiresPush: extractYesNo(block, "需要push") || extractYesNo(block, "push"),
+      requiresDeployment: extractYesNo(block, "需要部署") || extractYesNo(block, "部署"),
+      codexPrompt: ""
+    });
   }
 
   return tasks;
 }
-
 function extractField(block: string, field: string): string {
   const patterns = [
     new RegExp(`-\\s*${field}[：:]\\s*(.+)`, "i"),
