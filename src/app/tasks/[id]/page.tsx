@@ -7,6 +7,7 @@ import { taskStatusLabels } from "@/lib/constants";
 import type { TaskStatus } from "@prisma/client";
 import { CopyPromptButton } from "./copy-prompt-button";
 import { TaskEditForm } from "./task-edit-form";
+import { ExecuteWithCodexButton } from "./execute-button";
 
 export const dynamic = "force-dynamic";
 
@@ -113,6 +114,7 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
             <h2 className="font-semibold text-zinc-950">Codex Prompt</h2>
             <CopyPromptButton prompt={task.codexPrompt} />
           </div>
+          <ExecuteWithCodexButton taskId={task.id} hasCodexPrompt={!!task.codexPrompt} />
           <pre className="max-h-96 overflow-auto whitespace-pre-wrap p-5 text-sm leading-6 text-zinc-700">
             {task.codexPrompt}
           </pre>

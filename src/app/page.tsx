@@ -7,6 +7,7 @@ import { StatusBadge } from "@/components/common/status-badge";
 import { taskStatusLabels } from "@/lib/constants";
 import { formatDate } from "@/lib/utils";
 import { DashboardCharts } from "@/features/charts/dashboard-charts";
+import { QuickPlan } from "@/app/dashboard/quick-plan";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +40,10 @@ export default async function Home() {
             </div>
           );
         })}
+      </section>
+
+      <section>
+        <QuickPlan />
       </section>
 
       <section>
