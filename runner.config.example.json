@@ -1,0 +1,16 @@
+{
+  "serverUrl": "https://codex.5176nas.site",
+  "hostId": "macbook-pro-ai-devos",
+  "name": "MacBook Pro AI DevOS Runner",
+  "description": "Local Codex runner for AI DevOS project work.",
+  "baseUrl": "http://127.0.0.1:3000",
+  "capabilities": ["codex", "git", "node", "docker"],
+  "projectScopes": ["ai-devos"],
+  "maxConcurrency": 1,
+  "codexBin": "/Applications/Codex.app/Contents/Resources/codex",
+  "pollIntervalSeconds": 20,
+  "workdir": "/Users/liyaxun/SynologyDrive/日常工作/Github/AI-DevOS",
+  "projectWorkdirs": {
+    "ai-devos": "/Users/liyaxun/SynologyDrive/日常工作/Github/AI-DevOS"
+  }
+}

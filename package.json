@@ -11,6 +11,7 @@
     "docker:up": "docker compose up -d --build",
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f ai-devos",
+    "runner:codex": "node scripts/codex-runner.mjs",
     "desktop:dev": "tauri dev",
     "desktop:build": "tauri build",
     "lint": "eslint",

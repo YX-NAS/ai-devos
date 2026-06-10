@@ -151,13 +151,35 @@ model Task {
   commitSha          String?
   pullRequestUrl     String?
   deployedUrl        String?
+  runnerId           String?
+  claimedAt          DateTime?
+  startedAt          DateTime?
+  completedAt        DateTime?
   reviewedAt         DateTime?
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  runner  Runner? @relation(fields: [runnerId], references: [id], onDelete: SetNull)
   reviews Review[]
   deployments DeploymentRecord[]
+}
+
+model Runner {
+  id             String    @id @default(cuid())
+  name           String
+  hostId         String    @unique
+  description    String?
+  baseUrl        String?
+  capabilities   String?
+  projectScopes  String?
+  maxConcurrency Int       @default(1)
+  isActive       Boolean   @default(true)
+  lastSeenAt     DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  tasks Task[]
 }
 
 model Prompt {

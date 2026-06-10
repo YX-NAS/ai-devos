@@ -11,6 +11,7 @@ PRAGMA foreign_keys=OFF;
 DROP TABLE IF EXISTS "WorkflowEvent";
 DROP TABLE IF EXISTS "ProjectAgentBinding";
 DROP TABLE IF EXISTS "AgentConfig";
+DROP TABLE IF EXISTS "Runner";
 DROP TABLE IF EXISTS "Review";
 DROP TABLE IF EXISTS "Prompt";
 DROP TABLE IF EXISTS "Task";
@@ -80,9 +81,33 @@ CREATE TABLE "Task" (
   "requiresDeployment" BOOLEAN NOT NULL DEFAULT false,
   "codexPrompt" TEXT,
   "resultSummary" TEXT,
+  "executionResult" TEXT,
+  "commitSha" TEXT,
+  "pullRequestUrl" TEXT,
+  "deployedUrl" TEXT,
+  "runnerId" TEXT,
+  "claimedAt" DATETIME,
+  "startedAt" DATETIME,
+  "completedAt" DATETIME,
+  "reviewedAt" DATETIME,
   "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updatedAt" DATETIME NOT NULL,
   CONSTRAINT "Task_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE "Runner" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "name" TEXT NOT NULL,
+  "hostId" TEXT NOT NULL UNIQUE,
+  "description" TEXT,
+  "baseUrl" TEXT,
+  "capabilities" TEXT,
+  "projectScopes" TEXT,
+  "maxConcurrency" INTEGER NOT NULL DEFAULT 1,
+  "isActive" BOOLEAN NOT NULL DEFAULT true,
+  "lastSeenAt" DATETIME,
+  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" DATETIME NOT NULL
 );
 
 CREATE TABLE "Prompt" (
@@ -150,6 +175,8 @@ CREATE TABLE "ProjectAgentBinding" (
 CREATE INDEX "Requirement_projectId_idx" ON "Requirement"("projectId");
 CREATE INDEX "DesignDocument_projectId_idx" ON "DesignDocument"("projectId");
 CREATE INDEX "Task_projectId_idx" ON "Task"("projectId");
+CREATE INDEX "Task_runnerId_idx" ON "Task"("runnerId");
+CREATE INDEX "Runner_hostId_idx" ON "Runner"("hostId");
 CREATE INDEX "Prompt_projectId_idx" ON "Prompt"("projectId");
 CREATE INDEX "Review_projectId_idx" ON "Review"("projectId");
 CREATE INDEX "Review_taskId_idx" ON "Review"("taskId");

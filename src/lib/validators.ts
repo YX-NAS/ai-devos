@@ -84,7 +84,8 @@ export const taskSchema = z.object({
   executionResult: z.string().optional().nullable(),
   commitSha: z.string().optional().nullable(),
   pullRequestUrl: z.string().optional().nullable(),
-  deployedUrl: z.string().optional().nullable()
+  deployedUrl: z.string().optional().nullable(),
+  runnerId: z.string().optional().nullable()
 });
 
 export const taskStatusSchema = z.object({
@@ -146,6 +147,42 @@ export const deploymentRecordSchema = z.object({
   url: z.string().optional().nullable(),
   commitSha: z.string().optional().nullable(),
   notes: z.string().optional().nullable()
+});
+
+export const runnerSchema = z.object({
+  name: z.string().min(1),
+  hostId: z.string().min(1).regex(/^[a-zA-Z0-9._-]+$/),
+  description: z.string().optional().nullable(),
+  baseUrl: z.string().url().optional().or(z.literal("")).nullable(),
+  capabilities: z.string().optional().nullable(),
+  projectScopes: z.string().optional().nullable(),
+  maxConcurrency: z.coerce.number().int().min(1).max(8).default(1),
+  isActive: z.coerce.boolean().default(true)
+});
+
+export const runnerHeartbeatSchema = runnerSchema.partial().extend({
+  hostId: z.string().min(1).regex(/^[a-zA-Z0-9._-]+$/),
+  name: z.string().min(1).optional()
+});
+
+export const runnerClaimSchema = z.object({
+  hostId: z.string().min(1)
+});
+
+export const runnerCompleteSchema = z.object({
+  hostId: z.string().min(1),
+  executionResult: z.string().optional().nullable(),
+  resultSummary: z.string().optional().nullable(),
+  commitSha: z.string().optional().nullable(),
+  pullRequestUrl: z.string().optional().nullable(),
+  deployedUrl: z.string().optional().nullable(),
+  status: z.enum(["REVIEW", "DONE"]).default("REVIEW")
+});
+
+export const runnerFailSchema = z.object({
+  hostId: z.string().min(1),
+  error: z.string().min(1),
+  resultSummary: z.string().optional().nullable()
 });
 
 export const projectAgentBindingSchema = z.object({

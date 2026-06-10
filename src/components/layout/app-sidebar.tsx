@@ -6,6 +6,7 @@ import {
   GitBranch,
   LayoutDashboard,
   PanelsTopLeft,
+  Server,
   Settings,
   Sparkles
 } from "lucide-react";
@@ -16,6 +17,7 @@ const navItems = [
   { href: "/tasks", label: "Tasks", icon: ClipboardList },
   { href: "/prompts", label: "Prompts", icon: Sparkles },
   { href: "/agents", label: "Agents", icon: Bot },
+  { href: "/runners", label: "Runners", icon: Server },
   { href: "/workflows", label: "Workflows", icon: GitBranch },
   { href: "/deployments", label: "Deployments", icon: Cloud },
   { href: "/settings", label: "Settings", icon: Settings }

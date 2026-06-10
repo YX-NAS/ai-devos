@@ -60,9 +60,27 @@ const schemaStatements = [
     "requiresDeployment" BOOLEAN NOT NULL DEFAULT false,
     "codexPrompt" TEXT,
     "resultSummary" TEXT,
+    "runnerId" TEXT,
+    "claimedAt" DATETIME,
+    "startedAt" DATETIME,
+    "completedAt" DATETIME,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL,
     CONSTRAINT "Task_projectId_fkey" FOREIGN KEY ("projectId") REFERENCES "Project" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+  )`,
+  `CREATE TABLE IF NOT EXISTS "Runner" (
+    "id" TEXT NOT NULL PRIMARY KEY,
+    "name" TEXT NOT NULL,
+    "hostId" TEXT NOT NULL UNIQUE,
+    "description" TEXT,
+    "baseUrl" TEXT,
+    "capabilities" TEXT,
+    "projectScopes" TEXT,
+    "maxConcurrency" INTEGER NOT NULL DEFAULT 1,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "lastSeenAt" DATETIME,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
   )`,
   `CREATE TABLE IF NOT EXISTS "Prompt" (
     "id" TEXT NOT NULL PRIMARY KEY,
@@ -145,6 +163,10 @@ const taskExecutionColumnMigrations = [
   { name: "commitSha", statement: `ALTER TABLE "Task" ADD COLUMN "commitSha" TEXT` },
   { name: "pullRequestUrl", statement: `ALTER TABLE "Task" ADD COLUMN "pullRequestUrl" TEXT` },
   { name: "deployedUrl", statement: `ALTER TABLE "Task" ADD COLUMN "deployedUrl" TEXT` },
+  { name: "runnerId", statement: `ALTER TABLE "Task" ADD COLUMN "runnerId" TEXT` },
+  { name: "claimedAt", statement: `ALTER TABLE "Task" ADD COLUMN "claimedAt" DATETIME` },
+  { name: "startedAt", statement: `ALTER TABLE "Task" ADD COLUMN "startedAt" DATETIME` },
+  { name: "completedAt", statement: `ALTER TABLE "Task" ADD COLUMN "completedAt" DATETIME` },
   { name: "reviewedAt", statement: `ALTER TABLE "Task" ADD COLUMN "reviewedAt" DATETIME` }
 ];
 

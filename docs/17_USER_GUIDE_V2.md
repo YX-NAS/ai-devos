@@ -207,6 +207,8 @@ CODEX_BIN=/path/to/codex
 
 如果要使用 **Execute with Codex** 自动执行，必须确保 Settings 中的 **Codex Runtime** 为 `Ready`。否则系统会提示配置 `CODEX_BIN`，并将执行失败原因记录到任务中。
 
+也可以使用本机 Runner 模式：云端 AI DevOS 负责排队，本机 Codex 负责执行。详见第 12 节。
+
 ### 第4步：记录结果和验收
 
 1. 在 **执行结果** 区域填写：
@@ -217,7 +219,146 @@ CODEX_BIN=/path/to/codex
 2. 点击 **Save Changes**
 3. 将任务状态改为 REVIEW 或 DONE
 
-## 12. API 参考
+## 12. 本地 Runner 多主机配置 / Local Runner Setup
+
+路径 / Path：`/runners`
+
+用途 / Purpose：
+
+- 中文：把一台或多台本地主机注册为 Codex 执行节点，每台主机按项目范围领取 `READY_FOR_CODEX` 任务。
+- English: Register one or more local machines as Codex runners. Each host claims `READY_FOR_CODEX` tasks by project scope.
+
+### 工作方式 / How it works
+
+```
+AI DevOS Cloud Queue → Local Runner Heartbeat → Claim Task → Local Codex Exec → Write Result Back
+```
+
+| 能力 / Capability | 说明 / Description |
+|---|---|
+| 多主机 / Multiple hosts | 每台机器使用唯一 `hostId`，例如 `macbook-ai-devos`、`mac-mini-finance` |
+| 多项目 / Multiple projects | `projectScopes` 可按项目 slug/name/id 限定任务范围 |
+| 多目录 / Multiple workdirs | `projectWorkdirs` 把不同项目映射到不同本地仓库路径 |
+| 并发控制 / Concurrency | `maxConcurrency` 控制单台机器同时执行的任务数 |
+| 状态回写 / Result sync | 执行成功进入 `REVIEW`，失败进入 `BLOCKED` 并保存错误信息 |
+
+### 第1步：创建本机配置 / Step 1: Create local config
+
+```bash
+cp runner.config.example.json runner.config.json
+```
+
+示例 / Example：
+
+```json
+{
+  "serverUrl": "https://codex.5176nas.site",
+  "hostId": "macbook-pro-ai-devos",
+  "name": "MacBook Pro AI DevOS Runner",
+  "capabilities": ["codex", "git", "node", "docker"],
+  "projectScopes": ["ai-devos"],
+  "maxConcurrency": 1,
+  "codexBin": "/Applications/Codex.app/Contents/Resources/codex",
+  "pollIntervalSeconds": 20,
+  "workdir": "/Users/liyaxun/SynologyDrive/日常工作/Github/AI-DevOS",
+  "projectWorkdirs": {
+    "ai-devos": "/Users/liyaxun/SynologyDrive/日常工作/Github/AI-DevOS"
+  }
+}
+```
+
+配置说明 / Config reference：
+
+| 字段 / Field | 必填 / Required | 说明 / Description |
+|---|---:|---|
+| `serverUrl` | 是 / Yes | AI DevOS 云端地址 / Cloud AI DevOS URL |
+| `hostId` | 是 / Yes | 本机唯一标识 / Unique local host identity |
+| `name` | 是 / Yes | Runner 显示名称 / Display name |
+| `projectScopes` | 否 / No | 允许领取的项目 slug/name/id；为空表示所有项目 / Allowed project scopes; empty means all |
+| `maxConcurrency` | 否 / No | 本机并发任务数，建议 1 / Local concurrent tasks, 1 recommended |
+| `codexBin` | 是 / Yes | 本机 Codex 可执行文件路径 / Local Codex executable path |
+| `workdir` | 是 / Yes | 默认本地仓库目录 / Default local repository path |
+| `projectWorkdirs` | 否 / No | 按项目 slug 指定本地仓库目录 / Per-project local repository mapping |
+
+### 第2步：设置登录密码 / Step 2: Set login password
+
+Runner 复用现有登录接口，需要本机设置管理员密码环境变量：
+
+The runner reuses the existing login API, so set the admin password locally:
+
+```bash
+export AI_DEVOS_ADMIN_PASSWORD="your-admin-password"
+```
+
+### 第3步：确认 Codex 已在本机可用 / Step 3: Verify local Codex
+
+```bash
+/Applications/Codex.app/Contents/Resources/codex --version
+```
+
+如果路径不同，请修改 `runner.config.json` 的 `codexBin`。
+
+If your path is different, update `codexBin` in `runner.config.json`.
+
+### 第4步：启动 Runner / Step 4: Start runner
+
+单次测试 / One-shot test：
+
+```bash
+npm run runner:codex -- --once --dry-run
+```
+
+持续轮询 / Continuous polling：
+
+```bash
+npm run runner:codex
+```
+
+使用不同配置文件 / Use another config file：
+
+```bash
+AI_DEVOS_RUNNER_CONFIG=runner.mac-mini.json npm run runner:codex
+```
+
+### 第5步：多主机并行 / Step 5: Run multiple local hosts
+
+每台机器准备独立配置：
+
+Prepare one config per machine:
+
+```json
+{
+  "hostId": "mac-mini-finance",
+  "projectScopes": ["finance-bot"],
+  "workdir": "/Users/liyaxun/Github/finance-bot",
+  "projectWorkdirs": {
+    "finance-bot": "/Users/liyaxun/Github/finance-bot"
+  }
+}
+```
+
+注意 / Notes：
+
+- 中文：`hostId` 不能重复，否则会互相覆盖心跳。
+- English: `hostId` must be unique, otherwise hosts overwrite each other's heartbeat.
+- 中文：同一项目如果允许多台机器领取，建议 `maxConcurrency` 保持 1，降低冲突风险。
+- English: If multiple hosts can claim the same project, keep `maxConcurrency` at 1 to reduce conflicts.
+- 中文：执行完成后任务会进入 `REVIEW`，仍需要人工验收后转 `DONE`。
+- English: Completed tasks move to `REVIEW`; approve them manually before moving to `DONE`.
+
+### 查看状态 / Monitor status
+
+进入 `/runners` 查看：
+
+Open `/runners` to see:
+
+- 最近心跳 / Last heartbeat
+- 并发数 / Concurrency
+- 项目范围 / Project scopes
+- 能力标签 / Capabilities
+- 最近任务 / Recent assigned tasks
+
+## 13. API 参考
 
 所有 API 路径均挂载在 `https://codex.5176nas.site/api/` 下，需要携带登录 Cookie。
 
@@ -236,6 +377,12 @@ CODEX_BIN=/path/to/codex
 | GET | `/api/deployments` | 获取部署记录 |
 | POST | `/api/projects/[id]/deployments` | 创建部署记录 |
 | GET/PATCH | `/api/agent-configs/[id]` | 获取/更新 Agent 配置 |
+| GET/POST | `/api/runners` | 获取/创建本地 Runner |
+| POST | `/api/runners/heartbeat` | Runner 注册/心跳 |
+| GET | `/api/runners/tasks/next?hostId=HOST` | 获取下一个可领取任务 |
+| POST | `/api/runners/tasks/[id]/claim` | Runner 领取任务 |
+| POST | `/api/runners/tasks/[id]/complete` | Runner 回写成功结果 |
+| POST | `/api/runners/tasks/[id]/fail` | Runner 回写失败结果 |
 
 ### 示例：通过 curl 操作
 
@@ -254,7 +401,7 @@ curl -X PATCH https://codex.5176nas.site/api/tasks/TASK_ID/status \
   -d '{"status":"REVIEW"}' -b cookie.txt
 ```
 
-## 13. 部署运维 / Operations
+## 14. 部署运维 / Operations
 
 ### 服务器信息
 - 主机：新加坡 2C4G（43.156.94.64）
@@ -307,5 +454,7 @@ docker-compose up -d
 | 复制 Codex Prompt | 任务详情 → Copy Prompt 按钮 |
 | 记录执行结果 | 任务详情 → 执行结果区域 → Save |
 | 配置 ChatGPT/Codex Profile | Settings `/settings` → Add Profile |
+| 查看本地执行节点 | Runners `/runners` |
+| 多主机本地执行 | 本机 `runner.config.json` + `npm run runner:codex` |
 | 查看部署历史 | Deployments `/deployments` |
 | 修改管理员密码 | 服务器 `.env` 中改 `AI_DEVOS_ADMIN_PASSWORD` 后重建容器 |
